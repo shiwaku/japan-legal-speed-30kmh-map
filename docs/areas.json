@@ -43,6 +43,21 @@
       "不明(60/30)": 46.9,
       "対象外": 204.4,
       "高速": 16.0
+    },
+    "official": {
+      "source": "川越市「道路の概要」 https://www.city.kawagoe.saitama.jp/kurashi/kotsu/1003125/1003150.html",
+      "as_of": "市道 2026-04-01 / 国道・県道 2024-04-01",
+      "official_total_km": 1711.6,
+      "gsi_normal_total_km": 2410.4,
+      "excess_km": 657.4,
+      "structural_share_pct": [
+        83.2,
+        87.8
+      ],
+      "changed_share_pct": [
+        59.9,
+        70.9
+      ]
     }
   }
 }

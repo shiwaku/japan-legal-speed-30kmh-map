@@ -89,6 +89,36 @@ cand = roads[roads.cls == common.CLS_CANDIDATE]
 bins = pd.cut(cand.frac_speed, [-0.01, 0, 0.3, 0.5, 0.7, 0.9, 1.0])
 print("\n候補(5.5m未満)の frac_speed 分布 km:", {str(k): round(v, 1) for k, v in (cand.groupby(bins, observed=False)["len_m"].sum() / 1000).items()})
 
+# ---- 道路法上の道路への換算 -------------------------------------------------
+# 地理院の中心線は私道・農道・未認定道路も含み、川越では市区町村道が道路統計の実延長を
+# 3 割ほど上回る。全国統計(道路法上の道路 122 万 km の約 7 割)と割合を比べるときは、
+# 市区町村道の超過分を「道路法適用外・幅員 5.5 m 未満・規制なし」とみなして分母と分子から
+# 引いた値を下限、引かない値を上限として幅で示す。道交法は私道にも及ぶので地図からは除かない。
+CTG_NAME = {0: "国道", 1: "都道府県道", 2: "市区町村道", 3: "高速自動車国道等"}
+official = area.cfg.get("official_road_km")
+official_out = None
+if official:
+    normal = roads[roads.ftCode.between(2701, 2704)]
+    gsi_km = (normal.groupby("rdCtg")["len_m"].sum() / 1000).rename(index=CTG_NAME)
+    cmp = pd.DataFrame({"GSI中心線 km": gsi_km, "道路統計 実延長 km": pd.Series({k: v for k, v in official.items() if k in CTG_NAME.values()})})
+    cmp["差 km"] = cmp["GSI中心線 km"] - cmp["道路統計 実延長 km"]
+    print("\n## 地理院中心線(通常道路) と 道路統計 実延長 の比較\n", cmp.round(1).to_string())
+    excess = max(0.0, float(cmp.loc["市区町村道", "差 km"]) if "市区町村道" in cmp.index else 0.0)
+    total = normal.len_m.sum() / 1000
+    a_km = normal.loc[normal.cls == common.CLS_CANDIDATE, "len_m"].sum() / 1000     # 構造的に対象(推定)
+    b_km = normal.loc[normal.final == common.FINAL_CHANGED, "len_m"].sum() / 1000  # 実際に 60→30
+    rng = lambda x: (round((x - excess) / (total - excess) * 100, 1), round(x / total * 100, 1))
+    official_out = {
+        "source": official.get("source"), "as_of": official.get("as_of"),
+        "official_total_km": round(float(cmp["道路統計 実延長 km"].sum()), 1),
+        "gsi_normal_total_km": round(float(total), 1),
+        "excess_km": round(excess, 1),
+        "structural_share_pct": rng(a_km),
+        "changed_share_pct": rng(b_km),
+    }
+    print(f"市区町村道の超過 {excess:.0f} km を道路法適用外とみなすと、通常道路 {total:.0f} km に対する割合は"
+          f" 構造的に対象 {rng(a_km)[0]}〜{rng(a_km)[1]}% / 60→30 変更 {rng(b_km)[0]}〜{rng(b_km)[1]}%")
+
 if not args.save:
     raise SystemExit
 
@@ -110,6 +140,7 @@ manifest[area.key] = {
     "classes": {k: round(float(v), 1) for k, v in s.sort_values(ascending=False).items()},
     "speed_before": {k: round(float(v), 1) for k, v in (roads.groupby("speed_before")["len_m"].sum() / 1000).items()},
     "speed_after": {k: round(float(v), 1) for k, v in (roads.groupby("speed_after")["len_m"].sum() / 1000).items()},
+    "official": official_out,
 }
 bs = roads.pivot_table(index="speed_before", columns="speed_after", values="len_m", aggfunc="sum", fill_value=0) / 1000
 print("\n## 改正前(行) → 改正後(列) km\n", bs.round(1).to_string())
