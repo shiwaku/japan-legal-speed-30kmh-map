@@ -188,14 +188,15 @@ fetch("areas.json").then(r => r.json()).then(json => {
   map = new maplibregl.Map({
     container: "map", hash: true,
     center: a.view.center, zoom: a.view.zoom, minZoom: 9, maxZoom: 18,
-    style: "style/pale.json",
+    style: "style/pale.json?v=2",  // スタイルを作り直したら v を上げる(ブラウザキャッシュ対策)
     attributionControl: false,
   });
   map.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution:
     '<a href="https://github.com/gsi-cyberjapan/optimal_bvmap" target="_blank">国土地理院 最適化ベクトルタイル</a> / <a href="https://github.com/gsi-cyberjapan/gsimaps-vector-experiment" target="_blank">地理院ベクトルタイル提供実験</a> / <a href="https://www.jartic.or.jp/service/opendata/" target="_blank">JARTIC 交通規制情報</a>' }));
   map.addControl(new maplibregl.NavigationControl(), "top-right");
   map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-right");
-  map.on("load", () => loadArea(areas[key] ? key : Object.keys(areas)[0], location.hash.length > 1));
+  // "load" はスプライト・グリフ・全タイルの取得完了まで待つので、スタイルが読めた時点で判定レイヤーを載せる
+  map.once("style.load", () => loadArea(areas[key] ? key : Object.keys(areas)[0], location.hash.length > 1));
 
   map.on("click", "roads", e => {
     const p = e.features[0].properties;

@@ -1,5 +1,6 @@
 #!/bin/bash
 # 6. out/<area>/final.geojson → docs/tiles/<area>.pmtiles
+#    Z12 から作る。Z10–11 は市全域が 1 タイルに入り(札幌は 19 万本で 15MB 超)、ブラウザが固まる。
 #
 # tippecanoe は Windows 向け配布が無いので WSL2 で実行する:
 #   wsl bash scripts/06_build_pmtiles.sh kawagoe
@@ -20,7 +21,7 @@ cp "$SRC" "$W/in.geojson"
 tippecanoe -o "$W/out.pmtiles" --force \
   -l roads -n "japan-legal-speed-30kmh-map $AREA" \
   -A "国土地理院ベクトルタイル提供実験 / JARTIC 交通規制情報" \
-  -Z10 -z16 --no-tile-size-limit --no-feature-limit \
+  -Z12 -z16 --no-tile-size-limit --no-feature-limit \
   -y final -y cls -y rnkWidth -y medSect -y rdCtg -y ftCode -y orgGILvl \
   -y reg_speed -y zone_speed -y frac_speed -y frac_zone -y frac_lane -y len_m \
   -y speed_before -y speed_after \

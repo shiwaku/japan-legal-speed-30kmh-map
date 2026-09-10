@@ -40,8 +40,18 @@
 | エリア | 市域内の道路中心線 | ★60→30 変更（推定） | 標識あり | ゾーン30 | 不明（5.5 m 以上） | JARTIC |
 |---|---|---|---|---|---|---|
 | [川越市](areas/kawagoe.json) | 2,615 km（通常道路 2,410 km） | **1,708 km（65.3% / 通常道路の 70.9%）** | 437 km | 176 km | 47 km（1.8%） | 2026-07 |
+| [札幌市](areas/sapporo.json) | 10,125 km（通常道路 8,043 km） | **5,094 km（50.3% / 通常道路の 63.3%）** | 1,397 km | 235 km | 1,081 km（10.7%） | 2026-07 |
 
 詳細は `out/<area>/summary_final.csv`、属性の分布は `out/<area>/summary_attrs.csv`。
+
+道路法上の道路に換算した割合（`official_road_km` による補正、下限〜上限）:
+
+| エリア | 対象道路（中央線等なし） | 60→30 に変わった | 地理院の市区町村道が道路統計を上回る分 |
+|---|---|---|---|
+| 川越市 | 83〜88% | 60〜71% | +657 km（+29%） |
+| 札幌市 | 56〜68% | 50〜63% | +2,201 km（+42%） |
+
+札幌市は認定路線網図（道路法の認定路線）で線分単位に確認でき、認定路線に乗る線分だけで見ると 60→30 は 55.8%（[notes/2026-09-10_sapporo.md](notes/2026-09-10_sapporo.md)）。記事の「札幌市 35%」は中心部だけの値なので、市全域のこの数字とは比べられない。
 
 ### 記事の「約7割」と比べるときの注意
 
@@ -91,8 +101,9 @@ python3 src/parse_regulation.py --zip-dir work/zip --out work
 
 ### 新しいエリアを追加する
 
-1. `areas/<key>.json` を作る（`areas/kawagoe.json` を写す）。`epsg` は長さを測る平面直角座標系（例: 札幌 = XII 系 6680）、`boundary_url` は市域 GeoJSON の URL（無ければ `data/areas/<key>/boundary.geojson` を直接置く）
-2. 上の 1〜6 を `--area <key>` で回す。`docs/areas.json` にエリアが追記され、ビューワのプルダウンに出る
+1. `areas/<key>.json` を作る（`areas/kawagoe.json` を写す）。`epsg` は長さを測る平面直角座標系（例: 札幌 = XII 系 6680）、`boundary_url` は市域 GeoJSON の URL（無ければ `data/areas/<key>/boundary.geojson` を直接置く。政令市は geoshape に市全体が無いので国土数値情報 N03 の区を結合する）
+2. **`official_road_km` に道路統計の実延長（国道・都道府県道・市区町村道、出典 URL、基準日）を必ず書く。** 市の「道路の概要」「道路現況」「統計書」にある。無いと `05` は止まる（`tests/test_areas.py` でも検査）。地理院中心線は私道・農道を含むので、これが無いと全国統計と比べられない
+3. 上の 1〜6 を `--area <key>` で回す。`docs/areas.json` にエリアが追記され、ビューワのプルダウンに出る
 
 ## ディレクトリ構成
 
@@ -137,7 +148,9 @@ docs/                       GitHub Pages: index.html, areas.json, tiles/<key>.pm
 
 - 国土地理院 [ベクトルタイル提供実験](https://github.com/gsi-cyberjapan/gsimaps-vector-experiment)（`experimental_bvmap`、属性仕様は [attribute.pdf](https://maps.gsi.go.jp/help/pdf/vector/attribute.pdf)）— [国土地理院コンテンツ利用規約](https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html)
 - [JARTIC 交通規制情報](https://www.jartic.or.jp/service/opendata/)（拡張版標準フォーマット k_2.1）— JARTIC オープンデータ利用規約
-- 市域: [geoshape.ex.nii.ac.jp 行政区域データ](https://geoshape.ex.nii.ac.jp/city/)（国土数値情報 N03 を元にしたもの）
+- 市域: [geoshape.ex.nii.ac.jp 行政区域データ](https://geoshape.ex.nii.ac.jp/city/)（川越）、[国土数値情報 行政区域 N03-20240101](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2024.html)（札幌、10 区を結合）
+- 道路統計: 川越市[「道路の概要」](https://www.city.kawagoe.saitama.jp/kurashi/kotsu/1003125/1003150.html)、札幌市[「札幌の交通・道路 2023」](https://www.city.sapporo.jp/sogokotsu/date/2023/documents/2023-01_road.pdf)
+- [札幌市認定路線網図](https://ckan.pf-sapporo.jp/dataset/sapporo_authorized_road)（CC BY 4.0、道路法の認定路線・幅員つき）
 - 背景地図: [国土地理院 最適化ベクトルタイル](https://github.com/gsi-cyberjapan/optimal_bvmap)（`optimal_bvmap-v1` PMTiles）。標準スタイル `std.json` を `scripts/make_pale_style.py` で淡色化した `docs/style/pale.json` で描画。スプライト・グリフは地理院のものを参照
 
 コードは Apache License 2.0（[LICENSE](LICENSE)）。`docs/tiles/*.pmtiles` と `out/` の集計は上記データの派生物で、それぞれの利用規約に従います。
