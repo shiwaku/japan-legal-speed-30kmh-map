@@ -8,5 +8,13 @@
   "_comment_boundary": "行政区域の GeoJSON。data/areas/<key>/boundary.geojson に無ければここから取る",
   "jartic_pref_code": "12",
   "_comment_jartic": "JARTIC の都道府県コードは JIS(11) と異なる。スクリプトは空間で絞るので参考値",
+  "official_road_km": {
+    "_comment": "道路法上の道路の実延長(道路統計)。地理院中心線は私道・農道など道路法適用外も含むので、全国統計(122万km)と割合を比べるときの分母補正に使う。市区町村道の超過分を道路法適用外とみなす",
+    "source": "川越市「道路の概要」 https://www.city.kawagoe.saitama.jp/kurashi/kotsu/1003125/1003150.html",
+    "as_of": "市道 2026-04-01 / 国道・県道 2024-04-01",
+    "国道": 27.6,
+    "都道府県道": 71.8,
+    "市区町村道": 1612.2
+  },
   "view": { "center": [139.4856, 35.9251], "zoom": 13 }
 }

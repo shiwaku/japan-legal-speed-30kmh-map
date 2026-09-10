@@ -138,6 +138,7 @@ function renderLegend(a) {
   document.getElementById("meta").innerHTML =
     `<b>${a.name}</b>: 市域内の道路中心線 ${a.total_km.toLocaleString()} km のうち <b>${changed.toLocaleString()} km（${(changed / a.total_km * 100).toFixed(1)}%）</b>が 60→30 に変わったと推定。` +
     (a.speed_before ? `30 km/h の道路は ${b30.toLocaleString()} km → ${a30.toLocaleString()} km、60 km/h（法定）の道路は ${b60.toLocaleString()} km → ${((a.speed_after || {})["60"] ?? 0).toLocaleString()} km。` : "") +
+    (a.official ? `<br>道路法上の道路（道路統計 ${a.official.official_total_km.toLocaleString()} km）に換算すると、対象道路（中央線等なし）は ${a.official.structural_share_pct[0]}〜${a.official.structural_share_pct[1]}%、60→30 に変わったのは ${a.official.changed_share_pct[0]}〜${a.official.changed_share_pct[1]}%（地理院中心線には私道・農道等が約 ${a.official.excess_km.toLocaleString()} km 含まれるため幅あり）。` : "") +
     `<br>JARTIC ${a.jartic_month} / 突合バッファ ${a.buffer_m} m / 生成 ${a.generated}`;
 }
 
