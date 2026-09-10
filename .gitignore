@@ -1,0 +1,20 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+
+# 取得データ(再取得できる)
+# - data/gsi/: mokuroku.csv.gz(75MB) と ZL16 タイル
+# - data/jartic/: jartic-traffic-regulation-converter が出す GeoJSONL(全国 1.4GB)
+# - data/areas/*/jartic_*.geojson: 04 が市域に切り出したもの
+data/gsi/
+data/jartic/
+data/areas/*/jartic_*.geojson
+
+# 中間生成物。集計表と判定図だけ残す
+out/*/*
+!out/*/summary_*.csv
+!out/*/final.png
+
+# macOS
+.DS_Store
