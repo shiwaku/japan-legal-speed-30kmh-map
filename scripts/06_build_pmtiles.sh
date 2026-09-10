@@ -2,10 +2,11 @@
 # 6. out/<area>/final.geojson → docs/tiles/<area>.pmtiles
 #
 # 2 段で作って tile-join で 1 本にする。
-#   Z9–11 (概観): 属性を final / speed_before / speed_after の 3 つに絞り、同じ属性の隣接線分を
-#                まとめる(--coalesce-smallest-as-needed)。市全域が 1〜数タイルに入るので、
-#                そのままだと札幌 19 万本で 15MB 超になりブラウザが固まる。
-#                短い線分は圧縮が効いてバイト上限では減らないので、本数上限(1.2 万/タイル)で抑える。
+#   Z9–11 (概観): 属性を final / speed_before / speed_after の 3 つに絞り、同じ属性の線分を
+#                1 本の MultiLineString にまとめる(--reorder --coalesce)。線分は落とさない。
+#                市全域が 1〜数タイルに入るので、そのままだと札幌 19 万本で 1 タイル 15MB 超になり
+#                ブラウザが固まるが、重いのは本数(フィーチャごとの処理)で、頂点数ではない。
+#                本数上限で落とすと道路網が歯抜けになるので、まとめる方式にした。
 #   Z12–16 (詳細): 全線分・全属性。クリックで判定根拠を見るのはこちら。
 # 低ズームは概観用で、集計は out/ の値を使う。
 #
@@ -28,8 +29,8 @@ NAME="japan-legal-speed-30kmh-map $AREA"
 ATTR="国土地理院ベクトルタイル提供実験 / JARTIC 交通規制情報"
 
 tippecanoe -o "$W/low.pmtiles" --force -l roads -n "$NAME" -A "$ATTR" \
-  -Z9 -z11 --maximum-tile-features=12000 --maximum-tile-bytes=400000 \
-  --coalesce-smallest-as-needed --drop-smallest-as-needed --simplification=6 \
+  -Z9 -z11 --no-feature-limit --no-tile-size-limit \
+  --reorder --coalesce --reverse --simplification=8 \
   -y final -y speed_before -y speed_after \
   "$W/in.geojson"
 
