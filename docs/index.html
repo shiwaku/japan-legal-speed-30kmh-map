@@ -158,7 +158,8 @@ function loadArea(key, keepView) {
     for (const l of ["roads", "roads-casing"]) if (map.getLayer(l)) map.removeLayer(l);
     map.removeSource("roads");
   }
-  map.addSource("roads", { type: "vector", url: `pmtiles://tiles/${key}.pmtiles` });
+  // タイルを作り直したら a.generated が変わるので、ブラウザの Range キャッシュが古いタイルと混ざらない
+  map.addSource("roads", { type: "vector", url: `pmtiles://tiles/${key}.pmtiles?v=${encodeURIComponent(a.generated || "")}` });
   // 背景地図の注記(「注記〜」の symbol 群、最後にまとまっている)より下、建物・道路より上に差し込む。
   // 先頭の symbol(水部表記点など)を目印にすると建物の下に埋もれる
   const layers = map.getStyle().layers;
