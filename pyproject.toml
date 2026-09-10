@@ -1,0 +1,25 @@
+[project]
+name = "japan-legal-speed-30kmh-map"
+version = "0.1.0"
+description = "生活道路 30 km/h(2026-09-01 施行)で法定速度が 60→30 に変わった道路を、地理院ベクトルタイルと JARTIC 交通規制情報から推定する"
+readme = "README.md"
+license = "Apache-2.0"
+authors = [
+    { name = "shiwaku" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "geopandas>=1.1.4",
+    "mapbox-vector-tile>=2.2.0",
+    "matplotlib>=3.11.1",
+    "mercantile>=1.2.1",
+    "pandas>=3.0.5",
+    "pyarrow>=25.0.1",
+    "pyproj>=3.8.0",
+    "rangehttpserver>=1.4.0",
+    "requests>=2.34.2",
+    "shapely>=2.1.2",
+]
+
+[tool.uv]
+package = false
