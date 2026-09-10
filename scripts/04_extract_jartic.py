@@ -27,11 +27,19 @@ area = common.Area(args.area)
 city = area.geometry()
 src = common.ROOT / args.jartic
 
-feats = []
-for layer in ("speed", "lane"):
-    with open(src / f"regulation_{layer}.geojsonl", encoding="utf-8") as f:
-        feats.extend(json.loads(line) for line in f)
-g = gpd.GeoDataFrame.from_features(feats, crs=4326)
+# 全国分(speed+lane で 300MB の GeoJSONL)を毎回読むと 47 都道府県で時間を食うので、
+# 初回に GeoParquet に変換して以後はそれを bbox で読む
+cache = src / "speed_lane.parquet"
+if not cache.exists():
+    feats = []
+    for layer in ("speed", "lane"):
+        with open(src / f"regulation_{layer}.geojsonl", encoding="utf-8") as f:
+            feats.extend(json.loads(line) for line in f)
+    allg = gpd.GeoDataFrame.from_features(feats, crs=4326)
+    allg = allg[allg.geom_type.isin(["LineString", "MultiLineString", "Polygon", "MultiPolygon"])]
+    allg.to_parquet(cache, write_covering_bbox=True)
+    print(f"cache: {len(allg)} features → {cache}")
+g = gpd.read_parquet(cache, bbox=tuple(city.bounds))
 g = g[g.intersects(city)].copy()
 g["kind"] = g["code"].map(KIND)
 g = g[g.kind.notna()]

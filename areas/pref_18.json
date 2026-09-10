@@ -1,0 +1,38 @@
+{
+  "name": "福井県",
+  "kind": "prefecture",
+  "pref_code": "18",
+  "epsg": 6674,
+  "_comment_epsg": "平面直角座標系 VI 系。県全域を 1 系で測る",
+  "_comment_boundary": "data/areas/<key>/boundary.geojson は国土数値情報 N03-20240101 の市区町村を結合したもの(make_pref_areas.py)",
+  "gsi_source": "experimental_bvmap",
+  "_comment_gsi": "地理院ベクトルタイル提供実験 ZL16 を全国分ダウンロードし(download_tiles_all.sh)、GDAL の MVT ドライバでディレクトリごと抽出(03_extract_roads_gdal.py)。市区町村版と同じ属性(medSect あり)",
+  "official_road_km": {
+    "_comment": "道路法上の道路の実延長(道路統計年報 2024 表19/22/25、高速は表15合計との差)。make_pref_official.py で生成",
+    "source": "国土交通省 道路統計年報 2024 道路の現況 表15/19/22/25 https://www.mlit.go.jp/road/ir/ir-data/tokei-nen/2024/nenpo02.html",
+    "as_of": "2023-03-31",
+    "高速自動車国道等": 158.7,
+    "国道": 812.1,
+    "都道府県道": 1586.6,
+    "市区町村道": 8589.5
+  },
+  "official_width": {
+    "_comment": "道路統計年報 表15 の幅員別実延長(km)と 5.5m 未満の割合",
+    "19.5m以上": 13.2,
+    "13.0-19.5m": 235.5,
+    "5.5-13.0m": 3874.9,
+    "改良済_5.5m未満": 4300.4,
+    "未改良_5.5m以上": 131.5,
+    "未改良_3.5-5.5m": 732.3,
+    "未改良_3.5m未満": 1859.0,
+    "うち自動車交通不能": 372.2,
+    "share_lt_5_5m_pct": 61.8
+  },
+  "view": {
+    "center": [
+      136.1409,
+      35.8203
+    ],
+    "zoom": 9
+  }
+}

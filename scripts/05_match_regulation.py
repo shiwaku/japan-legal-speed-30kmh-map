@@ -26,13 +26,18 @@ p.add_argument("--save", action="store_true", help="out/<area>/final.* と docs/
 args = p.parse_args()
 area = common.Area(args.area)
 
-roads = gpd.read_file(area.out / "roads_city.geojson").to_crs(area.epsg)
+pq = area.out / "roads_city.parquet"
+roads = (gpd.read_parquet(pq) if pq.exists() else gpd.read_file(area.out / "roads_city.geojson")).to_crs(area.epsg)
 roads = roads[roads.length > 0].reset_index(drop=True)
 roads["seg_id"] = roads.index
 roads["len_m"] = roads.length
 jl = gpd.read_file(area.jartic_lines).to_crs(area.epsg)
 jp = gpd.read_file(area.jartic_polygons).to_crs(area.epsg) if area.jartic_polygons.exists() else jl.iloc[0:0]
-jp = jp[jp.kind == "speed"]
+jp = jp[jp.kind == "speed"].copy()
+if len(jp):
+    # JARTIC の面規制(ゾーン30)には自己交差した多角形が混ざり、交差計算が TopologyException で落ちる(宮城・東京・福岡など 16 県)
+    jp["geometry"] = shapely.make_valid(jp.geometry.values)
+    jp = jp[~jp.geometry.is_empty]
 jartic_month = str(jl.jartic_month.iloc[0]) if "jartic_month" in jl and len(jl) else "?"
 
 
@@ -137,7 +142,11 @@ if not args.save:
 
 # ---- 出力 -------------------------------------------------------------------
 roads.to_parquet(area.out / "final.parquet")
-roads.to_crs(4326).to_file(area.out / "final.geojson", driver="GeoJSON")
+if area.cfg.get("kind") == "prefecture":
+    # 100 万本規模なので GeoJSON でなく FlatGeobuf(tippecanoe が直接読める)。frac_* は表示に使わないので落として小さくする
+    roads.to_crs(4326).drop(columns=["frac_speed", "frac_zone", "frac_lane", "frac_cl", "len_all_m", "in_city", "z", "x", "y"], errors="ignore").to_file(area.out / "final.fgb", driver="FlatGeobuf")
+else:
+    roads.to_crs(4326).to_file(area.out / "final.geojson", driver="GeoJSON")
 summary.to_csv(area.out / "summary_final.csv")
 
 # ビューワの目録。エリアごとに上書き

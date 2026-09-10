@@ -138,6 +138,7 @@ function renderLegend(a) {
   document.getElementById("meta").innerHTML =
     `<b>${a.name}</b>: 市域内の道路中心線 ${a.total_km.toLocaleString()} km のうち <b>${changed.toLocaleString()} km（${(changed / a.total_km * 100).toFixed(1)}%）</b>が 60→30 に変わったと推定。` +
     (a.speed_before ? `30 km/h の道路は ${b30.toLocaleString()} km → ${a30.toLocaleString()} km、60 km/h（法定）の道路は ${b60.toLocaleString()} km → ${((a.speed_after || {})["60"] ?? 0).toLocaleString()} km。` : "") +
+    (a.official_width && a.official_width.share_lt_5_5m_pct != null ? `<br>道路統計年報の幅員 5.5 m 未満の割合: ${a.official_width.share_lt_5_5m_pct}%（道路法上の道路、2023-03-31）。` : "") +
     (a.official ? `<br>道路法上の道路（道路統計 ${a.official.official_total_km.toLocaleString()} km）に換算すると、対象道路（中央線等なし）は ${a.official.structural_share_pct[0]}〜${a.official.structural_share_pct[1]}%、60→30 に変わったのは ${a.official.changed_share_pct[0]}〜${a.official.changed_share_pct[1]}%（地理院中心線には私道・農道等が約 ${a.official.excess_km.toLocaleString()} km 含まれるため幅あり）。` : "") +
     `<br>JARTIC ${a.jartic_month} / 突合バッファ ${a.buffer_m} m / 生成 ${a.generated}`;
 }
@@ -159,7 +160,9 @@ function loadArea(key, keepView) {
     map.removeSource("roads");
   }
   // タイルを作り直したら a.generated が変わるので、ブラウザの Range キャッシュが古いタイルと混ざらない
-  map.addSource("roads", { type: "vector", url: `pmtiles://tiles/${key}.pmtiles?v=${encodeURIComponent(a.generated || "")}` });
+  // 都道府県・全国は 1 本の全国 PMTiles(外部配信、areas.json の tiles)を共有する。市区町村は docs/tiles/<key>.pmtiles
+  const tilesUrl = a.tiles ? a.tiles : `tiles/${key}.pmtiles?v=${encodeURIComponent(a.generated || "")}`;
+  map.addSource("roads", { type: "vector", url: `pmtiles://${tilesUrl}` });
   // 背景地図の注記(「注記〜」の symbol 群、最後にまとまっている)より下、建物・道路より上に差し込む。
   // 先頭の symbol(水部表記点など)を目印にすると建物の下に埋もれる
   const layers = map.getStyle().layers;
@@ -176,7 +179,15 @@ function loadArea(key, keepView) {
 fetch("areas.json").then(r => r.json()).then(json => {
   areas = json;
   const sel = document.getElementById("area");
-  for (const [k, a] of Object.entries(areas)) sel.add(new Option(a.name, k));
+  const groups = { japan: "全国", prefecture: "都道府県", city: "市区町村" };
+  for (const [gk, label] of Object.entries(groups)) {
+    // 都道府県・全国はタイル URL(全国 PMTiles)が入るまでプルダウンに出さない
+    const entries = Object.entries(areas).filter(([, a]) => (a.kind || "city") === gk && (gk === "city" || a.tiles));
+    if (!entries.length) continue;
+    const og = document.createElement("optgroup"); og.label = label;
+    for (const [k, a] of entries) og.appendChild(new Option(a.name, k));
+    sel.appendChild(og);
+  }
   sel.addEventListener("change", () => loadArea(sel.value, false));
   document.querySelectorAll('#mode input').forEach(i => i.addEventListener("change", () => setMode(i.value)));
   document.addEventListener("keydown", e => {
@@ -188,7 +199,7 @@ fetch("areas.json").then(r => r.json()).then(json => {
   // 背景は国土地理院 最適化ベクトルタイル。std.json を淡色化した style/pale.json(scripts/make_pale_style.py)
   map = new maplibregl.Map({
     container: "map", hash: true,
-    center: a.view.center, zoom: a.view.zoom, minZoom: 9, maxZoom: 18,
+    center: a.view.center, zoom: a.view.zoom, minZoom: 5, maxZoom: 18,
     style: "style/pale.json?v=2",  // スタイルを作り直したら v を上げる(ブラウザキャッシュ対策)
     attributionControl: false,
   });
