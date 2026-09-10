@@ -49,7 +49,7 @@
   <div class="note">
     <kbd>B</kbd> キーで改正前／改正後を切り替えられます。<br>
     幅員 5.5 m 以上の道路は中央線の有無が公開データから判定できないため「不明」。幅員 5.5 m 未満で中央線がある道路は原理的に検出できない。<b>標識の現地確認に代わるものではありません。</b><br>
-    出典: <a href="https://github.com/gsi-cyberjapan/gsimaps-vector-experiment" target="_blank">国土地理院 ベクトルタイル提供実験</a> / <a href="https://www.jartic.or.jp/service/opendata/" target="_blank">JARTIC 交通規制情報</a> / <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル（淡色地図）</a><br>
+    出典: <a href="https://github.com/gsi-cyberjapan/gsimaps-vector-experiment" target="_blank">国土地理院 ベクトルタイル提供実験</a> / <a href="https://www.jartic.or.jp/service/opendata/" target="_blank">JARTIC 交通規制情報</a> / 背景: <a href="https://github.com/gsi-cyberjapan/optimal_bvmap" target="_blank">国土地理院 最適化ベクトルタイル</a>（標準スタイルを淡色化）<br>
     判定方法・コード: <a href="https://github.com/shiwaku/japan-legal-speed-30kmh-map" target="_blank">github.com/shiwaku/japan-legal-speed-30kmh-map</a>
   </div>
 </div>
@@ -158,10 +158,14 @@ function loadArea(key, keepView) {
     map.removeSource("roads");
   }
   map.addSource("roads", { type: "vector", url: `pmtiles://tiles/${key}.pmtiles` });
+  // 背景地図の注記(「注記〜」の symbol 群、最後にまとまっている)より下、建物・道路より上に差し込む。
+  // 先頭の symbol(水部表記点など)を目印にすると建物の下に埋もれる
+  const layers = map.getStyle().layers;
+  const firstSymbol = (layers.find(l => l.type === "symbol" && l.id.startsWith("注記")) || { id: undefined }).id;
   map.addLayer({ id: "roads-casing", type: "line", source: "roads", "source-layer": "roads",
-    paint: { "line-color": "#fff", "line-width": w(1.2, 3.5, 9), "line-opacity": 0.7 } });
+    paint: { "line-color": "#fff", "line-width": w(1.2, 3.5, 9), "line-opacity": 0.7 } }, firstSymbol);
   map.addLayer({ id: "roads", type: "line", source: "roads", "source-layer": "roads",
-    layout: { "line-cap": "round", "line-join": "round" }, paint: paint() });
+    layout: { "line-cap": "round", "line-join": "round" }, paint: paint() }, firstSymbol);
   renderLegend(a);
   applyStyle();
   if (!keepView) map.jumpTo({ center: a.view.center, zoom: a.view.zoom });
@@ -179,17 +183,15 @@ fetch("areas.json").then(r => r.json()).then(json => {
 
   const key = new URLSearchParams(location.search).get("area") || Object.keys(areas)[0];
   const a = areas[key] || areas[Object.keys(areas)[0]];
+  // 背景は国土地理院 最適化ベクトルタイル。std.json を淡色化した style/pale.json(scripts/make_pale_style.py)
   map = new maplibregl.Map({
     container: "map", hash: true,
     center: a.view.center, zoom: a.view.zoom, minZoom: 9, maxZoom: 18,
-    style: {
-      version: 8,
-      sources: { pale: { type: "raster", tileSize: 256, maxzoom: 18,
-        tiles: ["https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png"],
-        attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a> / <a href="https://github.com/gsi-cyberjapan/gsimaps-vector-experiment" target="_blank">地理院ベクトルタイル提供実験</a> / <a href="https://www.jartic.or.jp/service/opendata/" target="_blank">JARTIC 交通規制情報</a>' } },
-      layers: [{ id: "pale", type: "raster", source: "pale", paint: { "raster-opacity": 0.55 } }]
-    }
+    style: "style/pale.json",
+    attributionControl: false,
   });
+  map.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution:
+    '<a href="https://github.com/gsi-cyberjapan/optimal_bvmap" target="_blank">国土地理院 最適化ベクトルタイル</a> / <a href="https://github.com/gsi-cyberjapan/gsimaps-vector-experiment" target="_blank">地理院ベクトルタイル提供実験</a> / <a href="https://www.jartic.or.jp/service/opendata/" target="_blank">JARTIC 交通規制情報</a>' }));
   map.addControl(new maplibregl.NavigationControl(), "top-right");
   map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-right");
   map.on("load", () => loadArea(areas[key] ? key : Object.keys(areas)[0], location.hash.length > 1));

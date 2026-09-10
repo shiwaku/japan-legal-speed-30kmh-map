@@ -88,6 +88,7 @@ areas/<key>.json            エリア定義（名称・EPSG・市域の URL・�
 scripts/
   common.py                 パス規約と判定ロジック（ここだけテストされる）
   01_list_tiles.py … 06_build_pmtiles.sh
+  make_pale_style.py        地理院 最適化ベクトルタイル std.json → 淡色スタイル docs/style/pale.json
 tests/test_classify.py
 data/
   areas/<key>/              boundary.geojson, tiles_z16.csv（コミット）, jartic_*.geojson（04 の出力、ignore）
@@ -95,7 +96,7 @@ data/
   jartic/<yyyymm>/          converter の GeoJSONL（ignore）
 out/<key>/                  roads_z16.parquet, roads_city.geojson, final.{parquet,geojson}（ignore）
                             summary_*.csv, final.png（コミット）
-docs/                       GitHub Pages: index.html, areas.json, tiles/<key>.pmtiles
+docs/                       GitHub Pages: index.html, areas.json, tiles/<key>.pmtiles, style/pale.json（背景地図スタイル）
 ```
 
 ## 実データで分かったこと
@@ -124,6 +125,6 @@ docs/                       GitHub Pages: index.html, areas.json, tiles/<key>.pm
 - 国土地理院 [ベクトルタイル提供実験](https://github.com/gsi-cyberjapan/gsimaps-vector-experiment)（`experimental_bvmap`、属性仕様は [attribute.pdf](https://maps.gsi.go.jp/help/pdf/vector/attribute.pdf)）— [国土地理院コンテンツ利用規約](https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html)
 - [JARTIC 交通規制情報](https://www.jartic.or.jp/service/opendata/)（拡張版標準フォーマット k_2.1）— JARTIC オープンデータ利用規約
 - 市域: [geoshape.ex.nii.ac.jp 行政区域データ](https://geoshape.ex.nii.ac.jp/city/)（国土数値情報 N03 を元にしたもの）
-- ベースマップ: [地理院タイル（淡色地図）](https://maps.gsi.go.jp/development/ichiran.html)
+- 背景地図: [国土地理院 最適化ベクトルタイル](https://github.com/gsi-cyberjapan/optimal_bvmap)（`optimal_bvmap-v1` PMTiles）。標準スタイル `std.json` を `scripts/make_pale_style.py` で淡色化した `docs/style/pale.json` で描画。スプライト・グリフは地理院のものを参照
 
 コードは Apache License 2.0（[LICENSE](LICENSE)）。`docs/tiles/*.pmtiles` と `out/` の集計は上記データの派生物で、それぞれの利用規約に従います。
