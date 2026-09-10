@@ -10,6 +10,8 @@ __pycache__/
 data/gsi/
 data/jartic/
 data/areas/*/jartic_*.geojson
+# - data/areas/*/osm_highways.geojson: scripts/experiments/osm_road_class.py の Overpass キャッシュ
+data/areas/*/osm_highways.geojson
 
 # 中間生成物。集計表と判定図だけ残す
 out/*/*
