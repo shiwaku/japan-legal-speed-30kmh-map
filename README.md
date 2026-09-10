@@ -8,7 +8,8 @@
 
 ## 地図
 
-<!-- Pages を有効にしたら URL を入れる -->
+**https://shiwaku.github.io/japan-legal-speed-30kmh-map/**
+
 `docs/index.html`（MapLibre GL JS + PMTiles）。エリアをプルダウンで切り替え、**「判定 / 改正前の速度 / 改正後の速度」**をタブ（または <kbd>B</kbd> キー）で切り替えられます。改正前は標識の無い一般道が一様に 60 km/h（青）で、改正後にその大半が 30 km/h（赤）に変わるのが見えます。凡例のチェックで表示クラスを絞り、道路をクリックすると判定根拠（改正前後の速度・幅員区分・規制の重なり率）が出ます。
 
 ![川越市の判定図](out/kawagoe/final.png)
