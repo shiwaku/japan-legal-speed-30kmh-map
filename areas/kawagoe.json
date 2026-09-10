@@ -1,0 +1,12 @@
+{
+  "name": "川越市",
+  "pref": "埼玉県",
+  "city_code": "11201",
+  "epsg": 6677,
+  "_comment_epsg": "平面直角座標系 IX 系。長さ・バッファはこの CRS で測る。北海道(札幌)は XII 系 6680",
+  "boundary_url": "https://geoshape.ex.nii.ac.jp/city/geojson/20230101/11/11201A1968.geojson",
+  "_comment_boundary": "行政区域の GeoJSON。data/areas/<key>/boundary.geojson に無ければここから取る",
+  "jartic_pref_code": "12",
+  "_comment_jartic": "JARTIC の都道府県コードは JIS(11) と異なる。スクリプトは空間で絞るので参考値",
+  "view": { "center": [139.4856, 35.9251], "zoom": 13 }
+}
