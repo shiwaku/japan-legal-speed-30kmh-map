@@ -12,6 +12,8 @@ data/jartic/
 data/areas/*/jartic_*.geojson
 # - data/areas/*/osm_highways.geojson: scripts/experiments/osm_road_class.py の Overpass キャッシュ
 data/areas/*/osm_highways.geojson
+# - data/areas/*/authorized_road/: 自治体の認定路線網図(shapefile)。areas/<key>.json の authorized_road.source から取る
+data/areas/*/authorized_road/
 
 # 中間生成物。集計表と判定図だけ残す
 out/*/*

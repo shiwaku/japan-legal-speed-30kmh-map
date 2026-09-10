@@ -84,6 +84,13 @@ def main():
                 paint[k] = walk(paint[k], lambda c: pale(c, to_white, sat))
         if t == "symbol":
             paint["text-halo-color"] = "rgba(255,255,255,0.9)"
+    # std.json は全国 1 本(17GB)の PMTiles を参照しており、初回表示でディレクトリ取得に 10〜30 秒かかる。
+    # 同じタイルが XYZ でも配信されているので、そちらを使う(初回が速い。pmtiles プロトコルも不要)
+    for src in style["sources"].values():
+        if src.get("type") == "vector":
+            src["tiles"] = ["https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/{z}/{x}/{y}.pbf"]
+            src.pop("url", None)
+            src["attribution"] = '<a href="https://github.com/gsi-cyberjapan/optimal_bvmap" target="_blank">国土地理院 最適化ベクトルタイル</a>'
     style["name"] = "GSI optimal_bvmap pale (japan-legal-speed-30kmh-map)"
     style.setdefault("metadata", {})["derived_from"] = SRC
     DST.parent.mkdir(parents=True, exist_ok=True)

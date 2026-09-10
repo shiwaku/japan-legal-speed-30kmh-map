@@ -1,0 +1,28 @@
+{
+  "name": "札幌市",
+  "pref": "北海道",
+  "city_code": "01100",
+  "epsg": 6680,
+  "_comment_epsg": "平面直角座標系 XII 系",
+  "_comment_boundary": "data/areas/sapporo/boundary.geojson は国土数値情報 N03-20240101(北海道) の 10 区(01101–01110)を結合したもの。geoshape には政令市全体の GeoJSON が無い",
+  "jartic_pref_code": "1",
+  "_comment_jartic": "JARTIC の都道府県コードは警察庁式。北海道は 1。スクリプトは空間で絞るので参考値",
+  "official_road_km": {
+    "_comment": "道路法上の道路の実延長(道路統計)。地理院中心線は私道・農道など道路法適用外も含むので、全国統計(122万km)と割合を比べるときの分母補正に使う。市区町村道の超過分を道路法適用外とみなす",
+    "source": "札幌市「札幌の交通・道路 2023」道路の主要指標 https://www.city.sapporo.jp/sogokotsu/date/2023/documents/2023-01_road.pdf",
+    "as_of": "2023-04-01",
+    "高速自動車国道等": 38.0,
+    "国道": 152.24,
+    "都道府県道": 240.28,
+    "市区町村道": 5302.79,
+    "_note": "ほかに自転車・歩行者専用道 111.73 km(市道扱い、車は通らない)。市全体の実延長は 5,845.04 km"
+  },
+  "authorized_road": {
+    "_comment": "札幌市認定路線網図(道路法の認定路線、幅員最小/最大つき)。線分単位で道路法上の道路かを判定できる。data/areas/sapporo/authorized_road/ に展開",
+    "source": "札幌市 ICT活用プラットフォーム DATA-SMART CITY SAPPORO https://ckan.pf-sapporo.jp/dataset/sapporo_authorized_road",
+    "license": "CC BY 4.0",
+    "as_of": "2025-09",
+    "epsg": 2454
+  },
+  "view": { "center": [141.3545, 43.0620], "zoom": 12 }
+}
