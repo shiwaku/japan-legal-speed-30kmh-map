@@ -1,0 +1,95 @@
+"""市区町村別の集計とビューワ用の境界データを作る。
+
+- 都道府県ごとの判定結果 out/pref_<code>/final.parquet を読み、各線分の中点が入る
+  市区町村(国土数値情報 N03-20240101)に割り当てて final / speed_before / speed_after 別の延長を集計する
+  (中点方式なので市区町村境をまたぐ線分は片方に丸ごと入る。03 の都道府県割り当てと同じ)
+- 政令指定都市は区ごとに加えて市全体(コード XX100)も出す
+- 出力
+  - viewer/public/municipalities.json: {code: {name, pref_code, bbox, total_km, classes, speed_before, speed_after}}
+  - data/n03/municipalities.fgb: 境界(code, name)。06_build_municipalities_pmtiles.sh で PMTiles にする
+道路統計年報は都道府県単位なので、市区町村では道路法換算(下限〜上限)は出さない。
+"""
+from __future__ import annotations
+
+import json
+import sys
+import zipfile
+from pathlib import Path
+
+import geopandas as gpd
+import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import common  # noqa: E402
+
+N03_ZIP = common.DATA / "n03" / "N03-20240101_GML.zip"
+OUT_JSON = common.DOCS / "municipalities.json"
+OUT_FGB = common.DATA / "n03" / "municipalities.fgb"
+
+with zipfile.ZipFile(N03_ZIP) as z:
+    shp = next(n for n in z.namelist() if n.endswith(".shp"))
+n03 = gpd.read_file(f"zip://{N03_ZIP}!{shp}", encoding="utf-8").to_crs(4326)
+n03 = n03[n03["N03_007"].notna()].copy()  # 所属未定地はコード無し
+n03["code"] = n03["N03_007"].astype(str).str.zfill(5)
+n03["pref_code"] = n03["code"].str[:2]
+n03["city"] = n03["N03_004"].fillna("")
+n03["ward"] = n03["N03_005"].fillna("")
+n03["name"] = n03["city"] + n03["ward"]
+print(f"N03: {len(n03)} polygons, {n03['code'].nunique()} codes")
+
+# 境界(コードで結合)。政令市の市全体も 1 つの地物にする
+muni = n03.dissolve(by="code", aggfunc={"name": "first", "pref_code": "first", "city": "first", "ward": "first"}).reset_index()
+desig = muni[muni["ward"] != ""].dissolve(by="city", aggfunc={"pref_code": "first"}).reset_index()
+# 政令市のコードは N03 に無い。区コードは市コードの直後から連番(横浜 14100→14101…, 川崎 14130→14131…)なので
+# 最小の区コードを 10 の位で切り下げる
+city_code = {c: f"{int(g['code'].min()) // 10 * 10:05d}" for c, g in muni[muni["ward"] != ""].groupby("city")}
+desig["code"] = desig["city"].map(city_code)
+desig["name"] = desig["city"]
+desig["ward"] = ""
+muni = pd.concat([muni, desig[muni.columns]], ignore_index=True)
+muni = gpd.GeoDataFrame(muni, geometry="geometry", crs=4326).sort_values("code").reset_index(drop=True)
+print(f"municipalities incl. designated cities: {len(muni)}")
+
+bounds = muni.bounds
+info: dict[str, dict] = {}
+for r, b in zip(muni.itertuples(), bounds.itertuples()):
+    info[r.code] = {
+        "name": r.name, "pref_code": r.pref_code, "city": r.city, "ward": r.ward,
+        "bbox": [round(b.minx, 4), round(b.miny, 4), round(b.maxx, 4), round(b.maxy, 4)],
+    }
+
+def tally(df: pd.DataFrame, col: str) -> dict[str, float]:
+    s = df.groupby(col)["len_m"].sum() / 1000
+    return {k: round(float(v), 1) for k, v in s.sort_values(ascending=False).items() if v > 0}
+
+for code in sorted(n03["pref_code"].unique()):
+    src = common.ROOT / "out" / f"pref_{code}" / "final.parquet"
+    if not src.exists():
+        print(code, "final.parquet が無い"); continue
+    roads = gpd.read_parquet(src)
+    polys = muni[(muni["pref_code"] == code) & ~muni["code"].isin(city_code.values())]  # 区 + 区を持たない市町村(市全体は除く)
+    polys = polys.to_crs(roads.crs)[["code", "geometry"]]
+    pts = gpd.GeoDataFrame(roads[["len_m", "final", "speed_before", "speed_after"]], geometry=roads.geometry.interpolate(0.5, normalized=True), crs=roads.crs)
+    j = gpd.sjoin(pts, polys, how="left", predicate="within")
+    j = j[~j.index.duplicated(keep="first")]
+    miss = j["code"].isna()
+    if miss.any():  # 海岸線のずれなどで外に出た中点は最寄りに
+        near = gpd.sjoin_nearest(pts[miss], polys, how="left", max_distance=2000)
+        near = near[~near.index.duplicated(keep="first")]
+        j.loc[miss, "code"] = near["code"]
+    j = j[j["code"].notna()]
+    print(f"{code}: {len(roads)} segments, {int(miss.sum())} outside → nearest, {int((~j.index.isin(roads.index)).sum())} dropped")
+    for mcode, g in j.groupby("code"):
+        info[mcode].update({"total_km": round(float(g["len_m"].sum()) / 1000, 1), "classes": tally(g, "final"),
+                            "speed_before": tally(g, "speed_before"), "speed_after": tally(g, "speed_after")})
+    # 政令市の市全体
+    for city, g in j[j["code"].isin(muni.loc[muni["ward"] != "", "code"])].merge(muni[["code", "city"]], on="code").groupby("city"):
+        ccode = city_code[city]
+        info[ccode].update({"total_km": round(float(g["len_m"].sum()) / 1000, 1), "classes": tally(g, "final"),
+                            "speed_before": tally(g, "speed_before"), "speed_after": tally(g, "speed_after")})
+
+info = {k: v for k, v in info.items() if "total_km" in v}
+OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
+OUT_JSON.write_text(json.dumps(info, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+muni[muni["code"].isin(info)][["code", "name", "pref_code", "geometry"]].to_file(OUT_FGB, driver="FlatGeobuf")
+print(f"wrote {OUT_JSON} ({OUT_JSON.stat().st_size / 1e6:.1f} MB, {len(info)} entries) and {OUT_FGB}")
