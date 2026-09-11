@@ -151,8 +151,10 @@ main に `viewer/**` の変更が入ると `.github/workflows/deploy-viewer.yml`
 | 機能 | 内容 |
 |---|---|
 | エリア | 全国 / 都道府県 / 市区町村をプルダウンで切替。都道府県・全国は R2 の全国 PMTiles、市区町村は `public/tiles/` |
-| 市区町村 | 都道府県を選ぶと市区町村（政令市は市全体と区）のプルダウンが出る。選ぶとその範囲へ寄せ、輪郭を強調し、凡例と要約をその市区町村の集計に切り替える（`?area=pref_11&muni=11201`）。集計は線分の中点で市区町村に割り当てたもので、道路統計との比較（道路法換算）は都道府県単位のみ |
+| 市区町村別の色分け | ズーム 12 未満では全 1,900 市区町村を変更率（車道のうち 60→30 になった割合）で塗り分ける。区切りは 60 / 70 / 78 / 84%（実データの分布に合わせた）。ズーム 9 以上では変更率のラベルも出し、12 以上は判定線に入れ替わる |
+| 市区町村 | 全国 1,921 件から名前で検索（政令市は市全体と区の両方）。面をクリックしても選べる。選ぶとその範囲へ寄せ、輪郭を強調し、凡例と要約をその市区町村の集計に切り替える（`?area=pref_11&muni=11201`）。要約には全国順位も出す。集計は線分の中点で市区町村に割り当てたもので、道路統計との比較（道路法換算）は都道府県単位のみ |
 | 行政区域 | 国土数値情報 N03-20240101 の市区町村境界を線で重ねる（パネル下のチェックで ON/OFF） |
+| ホバー | マウスがある環境では、面に触れると市区町村名・車道・変更率を出す |
 | 表示 | 判定 / 改正前の速度 / 改正後の速度（<kbd>B</kbd> で前後トグル） |
 | 凡例 | 区分ごとに表示 ON/OFF、延長 km を併記。全ON/全OFF |
 | 背景 | 淡色 / 標準（地理院 最適化ベクトルタイル）/ 写真（地理院 全国最新写真）/ 白図 |
@@ -185,7 +187,8 @@ scripts/
   common.py                 パス規約と判定ロジック（ここだけテストされる）
   01_list_tiles.py … 06_build_pmtiles.sh
   make_pale_style.py        地理院 最適化ベクトルタイル std.json → 淡色スタイル viewer/public/pale.json
-  make_municipalities.py    市区町村別集計 viewer/public/municipalities.json と境界 data/n03/municipalities.fgb（→ 06_build_municipalities_pmtiles.sh）
+  make_municipalities.py    市区町村別集計 viewer/public/municipalities.json と境界・代表点 data/n03/municipalities{,_points}.fgb
+  06_build_municipalities_pmtiles.sh  上記 → tiles/municipalities.pmtiles（面 muni + 代表点 muni_pt の 2 レイヤー、Z4–12）
 tests/test_classify.py
 data/
   areas/<key>/              boundary.geojson, tiles_z16.csv（コミット）, jartic_*.geojson（04 の出力、ignore）

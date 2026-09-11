@@ -3,7 +3,7 @@ import { Protocol } from "pmtiles";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import { BASEMAPS, getBasemapStyle, insertBeforeId, type Basemap } from "./basemap";
-import { CHANGED, CTG, MODES, WIDTH, label, type AreaInfo, type Mode, type MuniInfo } from "./classes";
+import { CHANGED, CTG, MODES, MUNI_STEPS, WIDTH, defaultOff, label, orderedClasses, type AreaInfo, type Mode, type MuniInfo } from "./classes";
 import { applyThemeAttr, initialTheme, type Theme } from "./theme";
 import "./style.css";
 
@@ -29,13 +29,20 @@ const kindOf = (a: AreaInfo): "japan" | "prefecture" | "city" => a.kind ?? "city
 /** 都道府県・全国は外部の全国 PMTiles を共有。市区町村は public/tiles/<key>.pmtiles */
 const tilesUrl = (key: string, a: AreaInfo): string =>
   a.tiles ? a.tiles : `${location.origin}${BASE_URL}tiles/${key}.pmtiles?v=${encodeURIComponent(a.generated)}`;
+// 作り直したときに古い Range キャッシュと混ざらないよう、ビルド時刻を付ける
+const MUNI_TILES = `${location.origin}${BASE_URL}tiles/municipalities.pmtiles?v=${encodeURIComponent(__BUILD_TIME__)}`;
 
-// 表示クラス(モードごと)。既定は classes.ts の on
-const enabled: Record<Mode, Set<string>> = {
-  final: new Set(MODES[0].style.filter((s) => s.on).map((s) => s.value)),
-  speed_before: new Set(MODES[1].style.filter((s) => s.on).map((s) => s.value)),
-  speed_after: new Set(MODES[2].style.filter((s) => s.on).map((s) => s.value)),
-};
+// 非表示にしている区分(モードごと)。既定は classes.ts の on / defaultOff。
+// タイルに新しい区分名が現れても凡例に出せるよう、「出したもの」ではなく「隠したもの」を持つ
+const off: Record<Mode, Set<string>> = { final: new Set(), speed_before: new Set(), speed_after: new Set() };
+const seen: Record<Mode, Set<string>> = { final: new Set(), speed_before: new Set(), speed_after: new Set() };
+function ensureDefaults(m: Mode, values: string[]): void {
+  for (const v of values) {
+    if (seen[m].has(v)) continue;
+    seen[m].add(v);
+    if (defaultOff(m, v)) off[m].add(v);
+  }
+}
 
 // ---- 地図 ----
 const view = areas[current].view;
@@ -44,7 +51,7 @@ const map = new maplibregl.Map({
   style: await getBasemapStyle(base, theme),
   center: view.center,
   zoom: view.zoom,
-  minZoom: 5,
+  minZoom: 4,
   maxZoom: 18,
   hash: true,
   attributionControl: false,
@@ -65,47 +72,94 @@ map.addControl(new maplibregl.AttributionControl({ compact: true }));
 const w = (z10: unknown, z14: unknown, z17: unknown) => ["interpolate", ["linear"], ["zoom"], 10, z10, 14, z14, 17, z17];
 const emphasized = () =>
   mode === "final" ? ["==", ["get", "final"], CHANGED] : ["in", ["get", mode], ["literal", ["20", "30"]]];
+/** 車道以外(区分名が (ftCode) で終わる)と速度モードの「対象外」は薄く引く */
+const dimmed = () =>
+  mode === "final" ? ["in", "(ftCode)", ["to-string", ["get", "final"]]] : ["==", ["get", mode], "対象外"];
 const paint = () => {
   const st = MODES.find((m) => m.key === mode)!.style;
   return {
     "line-color": ["match", ["get", mode], ...st.flatMap((s) => [s.value, s.color]), "#999"],
     "line-width": w(["case", emphasized(), 0.8, 1.0], ["case", emphasized(), 2.2, 2.4], 6),
-    "line-opacity": ["case", ["in", ["get", mode], ["literal", ["非通常道路(ftCode)", "対象外"]]], 0.5, 0.95],
+    "line-opacity": ["case", dimmed(), 0.5, 0.95],
   } as Record<string, unknown>;
 };
+
+/** 市区町村の面塗り(変更率 %)。ズーム 12 未満だけ。 */
+const muniFillColor = () => ["step", ["get", "pct"], MUNI_STEPS[0][1], ...MUNI_STEPS.slice(1).flatMap(([v, c]) => [v, c])];
+const MUNI_ONLY = ["all", ["!=", ["get", "lv"], 2], ["has", "pct"]]; // 政令市全体は区と重なるので外す
 
 // setStyle 直後はスタイル読込中で addSource が例外になる。読込完了は style.load 側で拾って載せ直す
 let styleReady = false;
 map.on("style.load", () => { styleReady = true; addDataLayers(); });
 
+const OUR_LAYERS = ["muni-fill", "roads-casing", "roads", "muni-border", "muni-outline", "muni-label"];
+
 function addDataLayers(): void {
   if (!styleReady) return;
+  for (const id of OUR_LAYERS) if (map.getLayer(id)) map.removeLayer(id);
+  for (const id of ["roads", "muni"]) if (map.getSource(id)) map.removeSource(id);
+
   const a = areas[current];
-  if (map.getSource("roads")) {
-    for (const id of ["roads", "roads-casing"]) if (map.getLayer(id)) map.removeLayer(id);
-    map.removeSource("roads");
-  }
-  map.addSource("roads", { type: "vector", url: `pmtiles://${tilesUrl(current, a)}` });
+  map.addSource("roads", {
+    type: "vector", url: `pmtiles://${tilesUrl(current, a)}`,
+    attribution: '<a href="https://github.com/gsi-cyberjapan/gsimaps-vector-experiment" target="_blank" rel="noopener">国土地理院 ベクトルタイル提供実験</a> / <a href="https://www.jartic.or.jp/service/opendata/" target="_blank" rel="noopener">JARTIC 交通規制情報</a>',
+  });
+  map.addSource("muni", {
+    type: "vector", url: `pmtiles://${MUNI_TILES}`,
+    attribution: '<a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2024.html" target="_blank" rel="noopener">国土数値情報 行政区域</a>',
+  });
   // 背景地図の注記より下、建物・道路より上に差し込む(写真・白図では最上位)
   const before = insertBeforeId(map.getStyle());
-  map.addLayer(
-    { id: "roads-casing", type: "line", source: "roads", "source-layer": "roads", paint: { "line-color": "#fff", "line-width": w(1.2, 3.5, 9), "line-opacity": 0.7 } } as maplibregl.LayerSpecification,
-    before,
-  );
-  map.addLayer(
-    { id: "roads", type: "line", source: "roads", "source-layer": "roads", layout: { "line-cap": "round", "line-join": "round" }, paint: paint() } as maplibregl.LayerSpecification,
-    before,
-  );
-  // 行政区域(国土数値情報 N03)。全市区町村の境界線と、選択中の市区町村の強調(判定線の上、注記の下)
-  map.addSource("muni", { type: "vector", url: `pmtiles://${location.origin}${BASE_URL}tiles/municipalities.pmtiles` });
-  map.addLayer(
-    { id: "muni-border", type: "line", source: "muni", "source-layer": "muni", layout: { "line-join": "round" }, paint: { "line-color": "#111", "line-width": w(0.8, 1.2, 2), "line-opacity": 0.55 } } as unknown as maplibregl.LayerSpecification,
-    before,
-  );
-  map.addLayer(
-    { id: "muni-outline", type: "line", source: "muni", "source-layer": "muni", filter: ["==", ["get", "code"], ""], layout: { "line-join": "round" }, paint: { "line-color": "#111", "line-width": w(2, 3, 5), "line-dasharray": [2, 1.5], "line-opacity": 0.95 } } as unknown as maplibregl.LayerSpecification,
-    before,
-  );
+  const add = (layer: Record<string, unknown>) => map.addLayer(layer as unknown as maplibregl.LayerSpecification, before);
+
+  // 広域(ズーム 12 未満)は市区町村ごとの変更率を面で。判定線が出てくると入れ替わる
+  add({
+    id: "muni-fill", type: "fill", source: "muni", "source-layer": "muni", maxzoom: 12, filter: MUNI_ONLY,
+    paint: { "fill-color": muniFillColor(), "fill-opacity": ["interpolate", ["linear"], ["zoom"], 4, 0.78, 11.5, 0.78, 12, 0.4] },
+  });
+  add({
+    id: "roads-casing", type: "line", source: "roads", "source-layer": "roads",
+    paint: { "line-color": "#fff", "line-width": w(1.2, 3.5, 9), "line-opacity": 0.7 },
+  });
+  add({
+    id: "roads", type: "line", source: "roads", "source-layer": "roads",
+    layout: { "line-cap": "round", "line-join": "round" }, paint: paint(),
+  });
+  // 行政区域(国土数値情報 N03)の境界線と、選択中の市区町村の輪郭
+  add({
+    id: "muni-border", type: "line", source: "muni", "source-layer": "muni", filter: ["!=", ["get", "lv"], 2],
+    layout: { "line-join": "round" },
+    paint: {
+      "line-color": "#111",
+      "line-width": ["interpolate", ["linear"], ["zoom"], 5, 0.5, 10, 0.8, 14, 1.2, 17, 2],
+      // 広域では面塗りの邪魔になるので薄く
+      "line-opacity": ["interpolate", ["linear"], ["zoom"], 5, 0.35, 9, 0.5, 12, 0.6],
+    },
+  });
+  add({
+    id: "muni-outline", type: "line", source: "muni", "source-layer": "muni", filter: ["==", ["get", "code"], ""],
+    layout: { "line-join": "round" }, paint: { "line-color": "#111", "line-width": w(2, 3, 5), "line-dasharray": [2, 1.5], "line-opacity": 0.95 },
+  });
+  // 変更率のラベル(代表点)。市区町村名の注記と同じ場所に出るので、衝突判定を外して少し下にずらす
+  map.addLayer({
+    id: "muni-label", type: "symbol", source: "muni", "source-layer": "muni_pt", minzoom: 9, maxzoom: 12, filter: MUNI_ONLY,
+    layout: {
+      "text-field": ["concat", ["to-string", ["round", ["get", "pct"]]], "%"],
+      "text-font": ["NotoSansJP-Regular"],
+      "text-size": ["interpolate", ["linear"], ["zoom"], 9, 11, 11, 13],
+      "text-offset": [0, 1.2],
+      "text-allow-overlap": true,
+      "text-ignore-placement": true,
+    },
+    paint: {
+      "text-color": "#1a1a1a",
+      "text-halo-color": "rgba(255,255,255,0.9)",
+      "text-halo-width": 1.4,
+      // Z9 では車道 1,000 km 超の市区町村だけ(数が多いと読めない)。Z10 以上は全部。
+      // zoom 式は 1 つの interpolate にしか置けないので、各ストップの中で分岐する
+      "text-opacity": ["interpolate", ["linear"], ["zoom"], 9, ["case", [">", ["get", "car_km"], 1000], 1, 0], 10, 1],
+    },
+  } as unknown as maplibregl.LayerSpecification);
   applyStyle();
 }
 
@@ -113,23 +167,41 @@ function applyStyle(): void {
   if (!map.getLayer("roads")) return;
   const p = paint();
   for (const k in p) map.setPaintProperty("roads", k, p[k]);
-  const list = ["literal", [...enabled[mode]]];
+  const shown = ["!", ["in", ["get", mode], ["literal", [...off[mode]]]]];
   // 式の型は maplibre の FilterSpecification に素直に合わないので unknown 経由で渡す
-  map.setFilter("roads", ["in", ["get", mode], list] as unknown as maplibregl.FilterSpecification);
-  map.setFilter("roads-casing", ["all", emphasized(), ["in", ["get", mode], list]] as unknown as maplibregl.FilterSpecification);
-  if (map.getLayer("muni-outline")) {
-    map.setFilter("muni-outline", ["==", ["get", "code"], muni ?? ""] as unknown as maplibregl.FilterSpecification);
-    const ink = theme === "dark" ? "#f5f5f5" : "#111";
-    map.setPaintProperty("muni-outline", "line-color", ink);
-    map.setPaintProperty("muni-border", "line-color", ink);
-    map.setLayoutProperty("muni-border", "visibility", showBorders ? "visible" : "none");
-  }
+  map.setFilter("roads", shown as unknown as maplibregl.FilterSpecification);
+  map.setFilter("roads-casing", ["all", emphasized(), shown] as unknown as maplibregl.FilterSpecification);
+  if (!map.getLayer("muni-fill")) return;
+  const ink = theme === "dark" ? "#f5f5f5" : "#111";
+  map.setFilter("muni-outline", ["==", ["get", "code"], muni ?? ""] as unknown as maplibregl.FilterSpecification);
+  map.setPaintProperty("muni-outline", "line-color", ink);
+  map.setPaintProperty("muni-border", "line-color", ink);
+  map.setLayoutProperty("muni-border", "visibility", showBorders ? "visible" : "none");
+  map.setPaintProperty("muni-label", "text-color", theme === "dark" ? "#ffffff" : "#1a1a1a");
+  map.setPaintProperty("muni-label", "text-halo-color", theme === "dark" ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.9)");
+  for (const id of ["muni-fill", "muni-label"]) map.setLayoutProperty(id, "visibility", showFill ? "visible" : "none");
 }
 
-// ---- 行政区域の表示切替 ----
+// ---- 表示オプション(市区町村の色分け・行政区域の境界) ----
+let showFill = kindOf(areas[current]) !== "city"; // 市区町村エリアは Z9 から線が出るので面塗りは切る
 let showBorders = true;
+const fillChk = document.getElementById("choropleth") as HTMLInputElement;
 const bordersChk = document.getElementById("borders") as HTMLInputElement;
+const scaleEl = document.getElementById("muni-scale") as HTMLElement;
+
+function renderScale(): void {
+  scaleEl.hidden = !showFill;
+  if (showFill && !scaleEl.childElementCount) {
+    scaleEl.innerHTML = MUNI_STEPS.map(([from, color], i) => {
+      const to = MUNI_STEPS[i + 1]?.[0];
+      const t = i === 0 ? `〜${to}` : to == null ? `${from}〜` : `${from}〜${to}`;
+      return `<span class="scale-item"><span class="scale-sw" style="background:${color}"></span><span class="scale-t">${t}</span></span>`;
+    }).join("");
+  }
+}
+fillChk.checked = showFill;
 bordersChk.checked = showBorders;
+fillChk.addEventListener("change", () => { showFill = fillChk.checked; renderScale(); applyStyle(); });
 bordersChk.addEventListener("change", () => { showBorders = bordersChk.checked; applyStyle(); });
 
 // ---- テーマ・背景の切替(setStyle で全レイヤーが消えるので style.load 後に貼り直す) ----
@@ -184,7 +256,7 @@ collapseBtn.addEventListener("click", () => { panel.classList.toggle("collapsed"
 
 // ---- エリア選択(全国 / 都道府県 / 市区町村) ----
 const areaSel = document.getElementById("area") as HTMLSelectElement;
-for (const [gk, gname] of [["japan", "全国"], ["prefecture", "都道府県"], ["city", "市区町村"]] as const) {
+for (const [gk, gname] of [["japan", "全国"], ["prefecture", "都道府県"], ["city", "市区町村（詳細タイル）"]] as const) {
   // 都道府県・全国はタイル URL(全国 PMTiles)が入るまで出さない
   const entries = Object.entries(areas).filter(([, a]) => kindOf(a) === gk && (gk === "city" || a.tiles));
   if (!entries.length) continue;
@@ -194,13 +266,15 @@ for (const [gk, gname] of [["japan", "全国"], ["prefecture", "都道府県"], 
   areaSel.appendChild(og);
 }
 areaSel.value = current;
-areaSel.addEventListener("change", () => { muni = null; setArea(areaSel.value, true); });
+areaSel.addEventListener("change", () => { setMuni(null, false); setArea(areaSel.value, true); });
 
 function setArea(key: string, jump: boolean): void {
   current = key;
   areaSel.value = key;
+  showFill = kindOf(areas[key]) !== "city";
+  fillChk.checked = showFill;
+  renderScale();
   syncUrl();
-  void renderMuniSelect();
   renderLegend();
   addDataLayers();
   if (jump) map.jumpTo({ center: areas[key].view.center, zoom: areas[key].view.zoom });
@@ -210,49 +284,70 @@ function syncUrl(): void {
   history.replaceState(null, "", `?area=${current}${muni ? `&muni=${muni}` : ""}${location.hash}`);
 }
 
-// ---- 市区町村(都道府県を選んだときだけ)。集計は public/municipalities.json、輪郭は tiles/municipalities.pmtiles ----
+// ---- 市区町村(全国から検索、地図クリックでも選べる) ----
+// 集計は public/municipalities.json、面と代表点は tiles/municipalities.pmtiles
 let muni: string | null = params.get("muni");
 let munis: Record<string, MuniInfo> | null = null;
 let pendingFit = initialNoHash && !!muni; // URL に市区町村があってハッシュが無ければ、読込後にその市区町村へ寄せる
-const muniField = document.getElementById("muni-field") as HTMLElement;
-const muniSel = document.getElementById("muni") as HTMLSelectElement;
-const loadMunis = async (): Promise<Record<string, MuniInfo>> =>
-  (munis ??= await (await fetch(`${BASE_URL}municipalities.json`)).json());
+const muniRank = new Map<string, number>();
+let rankTotal = 0;
+const muniInput = document.getElementById("muni-input") as HTMLInputElement;
+const muniList = document.getElementById("muni-list") as HTMLDataListElement;
+const labelToCode = new Map<string, string>();
+const muniLabel = (m: MuniInfo): string => `${m.name}（${m.pref_name}）`;
 
-async function renderMuniSelect(): Promise<void> {
-  const a = areas[current];
-  if (kindOf(a) !== "prefecture" || !a.pref_code) {
-    muniField.hidden = true;
-    muni = null;
-    return;
+async function initMuni(): Promise<void> {
+  const all: Record<string, MuniInfo> = await (await fetch(`${BASE_URL}municipalities.json`)).json();
+  munis = all;
+  const frag = document.createDocumentFragment();
+  for (const [code, m] of Object.entries(all).sort(([a], [b]) => a.localeCompare(b))) {
+    const text = muniLabel(m);
+    labelToCode.set(text, code);
+    const o = document.createElement("option");
+    o.value = text;
+    frag.appendChild(o);
   }
-  const all = await loadMunis();
-  if (kindOf(areas[current]) !== "prefecture") return; // 読込中に切り替わった
-  const list = Object.entries(all).filter(([, m]) => m.pref_code === a.pref_code).sort(([x], [y]) => x.localeCompare(y));
-  muniSel.innerHTML = "";
-  muniSel.appendChild(new Option(`${a.name} 全体`, ""));
-  for (const [code, m] of list) muniSel.appendChild(new Option(m.ward ? `　${m.ward}` : m.name, code)); // 政令市の区は字下げ
+  muniList.appendChild(frag);
+  // 変更率の順位(政令市全体は区と重複するので除く)
+  const ranked = Object.entries(all).filter(([, m]) => m.lv !== 2 && m.pct != null).sort((a, b) => b[1].pct! - a[1].pct!);
+  ranked.forEach(([code], i) => muniRank.set(code, i + 1));
+  rankTotal = ranked.length;
   if (muni && !all[muni]) muni = null;
-  muniSel.value = muni ?? "";
-  muniField.hidden = false;
-  if (muni) { setMuni(muni, pendingFit); pendingFit = false; }
+  if (muni) { setMuni(muni, pendingFit); pendingFit = false; } else { renderLegend(); }
 }
-muniSel.addEventListener("change", () => setMuni(muniSel.value || null, true));
+
+const syncMuniInput = (): void => { muniInput.value = muni && munis?.[muni] ? muniLabel(munis[muni]) : ""; };
+
+/** 市区町村を選ぶ。タイルがその市区町村を含まないエリア(市区町村エリア)なら都道府県に切り替える。 */
+function selectMuni(code: string): void {
+  const m = munis?.[code];
+  if (!m) return;
+  const prefKey = `pref_${m.pref_code}`;
+  if (!areas[current].tiles && areas[prefKey]) setArea(prefKey, false);
+  setMuni(code, true);
+}
 
 function setMuni(code: string | null, jump: boolean): void {
   muni = code;
-  muniSel.value = code ?? "";
+  syncMuniInput();
   syncUrl();
   renderLegend();
   applyStyle();
   if (jump && code && munis?.[code]) {
     const [w0, s0, e0, n0] = munis[code].bbox;
     // 初回(URL 指定)は即時、操作で選んだときはアニメーション
-    map.fitBounds([[w0, s0], [e0, n0]], { padding: isMobile ? 24 : 40, maxZoom: 15, duration: munis && map.getLayer("roads") ? 600 : 0 });
-  } else if (jump && !code) {
-    map.jumpTo({ center: areas[current].view.center, zoom: areas[current].view.zoom });
+    map.fitBounds([[w0, s0], [e0, n0]], { padding: isMobile ? 24 : 40, maxZoom: 15, duration: map.getLayer("roads") ? 600 : 0 });
   }
 }
+
+muniInput.addEventListener("change", () => {
+  const v = muniInput.value.trim();
+  if (!v) { setMuni(null, false); return; }
+  const code = labelToCode.get(v) ?? [...labelToCode].find(([text]) => text.startsWith(v))?.[1];
+  if (code) selectMuni(code);
+  else syncMuniInput(); // 候補に無い入力は元に戻す
+});
+(document.getElementById("muni-clear") as HTMLButtonElement).addEventListener("click", () => setMuni(null, false));
 
 // ---- 表示モード(判定 / 改正前 / 改正後) ----
 const modeDiv = document.getElementById("mode") as HTMLElement;
@@ -273,6 +368,7 @@ function setMode(m: Mode): void {
   applyStyle();
 }
 document.addEventListener("keydown", (e) => {
+  if (e.target instanceof HTMLInputElement) return; // 検索入力中のキーは拾わない
   if (e.key === "b" || e.key === "B") setMode(mode === "speed_before" ? "speed_after" : "speed_before");
 });
 
@@ -281,21 +377,25 @@ const legendDiv = document.getElementById("legend") as HTMLElement;
 const statEl = document.getElementById("stat") as HTMLElement;
 const km = (v: number): string => `${Math.round(v).toLocaleString()} km`;
 
+/** 集計の対象。市区町村を選んでいればその市区町村、でなければエリア全体。 */
+function scopeTally(): Record<string, number> {
+  const scope = (muni && munis ? munis[muni] : areas[current]) as { classes: Record<string, number>; speed_before?: Record<string, number>; speed_after?: Record<string, number> };
+  return (mode === "final" ? scope.classes : mode === "speed_before" ? scope.speed_before : scope.speed_after) ?? {};
+}
+
 function renderLegend(): void {
   const a = areas[current];
-  const m = muni && munis ? munis[muni] : null; // 市区町村を選んでいれば凡例・集計はその市区町村のもの
-  const scope = m ?? a;
-  const tally: Record<string, number> = (mode === "final" ? scope.classes : mode === "speed_before" ? scope.speed_before : scope.speed_after) ?? {};
+  const m = muni && munis ? munis[muni] : null;
+  const tally = scopeTally();
+  ensureDefaults(mode, Object.keys(tally));
   legendDiv.innerHTML = "";
-  for (const s of MODES.find((m) => m.key === mode)!.style) {
-    const v = tally[s.value];
-    if (v == null) continue; // このエリアに無い区分は出さない
+  for (const s of orderedClasses(mode, tally)) {
     const row = document.createElement("label");
     row.className = "toggle";
     const input = document.createElement("input");
     input.type = "checkbox";
-    input.checked = enabled[mode].has(s.value);
-    input.addEventListener("change", () => { input.checked ? enabled[mode].add(s.value) : enabled[mode].delete(s.value); applyStyle(); });
+    input.checked = !off[mode].has(s.value);
+    input.addEventListener("change", () => { input.checked ? off[mode].delete(s.value) : off[mode].add(s.value); applyStyle(); });
     const sw = document.createElement("span");
     sw.className = "sw";
     sw.style.background = s.color;
@@ -304,24 +404,28 @@ function renderLegend(): void {
     text.textContent = label(mode, s.value);
     const val = document.createElement("span");
     val.className = "t-km";
-    val.textContent = km(v);
+    val.textContent = km(tally[s.value]);
     row.append(input, sw, text, val);
     legendDiv.append(row);
   }
-  const changed = scope.classes[CHANGED] ?? 0;
-  // 車道 = 中心線から軽車道・徒歩道等を除いたもの。市区町村は道路統計(都道府県単位)が無いので車道比だけ
-  const carKm = m ? m.total_km - (m.classes["非通常道路(ftCode)"] ?? 0) : a.official?.gsi_normal_total_km ?? a.total_km;
-  const name = m ? `${a.name} ${m.name}` : a.name;
+  // 要約。車道 = 中心線から軽車道・徒歩道等を除いたもの
+  const changed = m ? m.changed_km : a.classes[CHANGED] ?? 0;
+  const carKm = m ? m.car_km : a.official?.gsi_normal_total_km ?? a.total_km;
+  const name = m ? `${m.pref_name} ${m.name}` : a.name;
   let s = `<b>${name}</b>: 車道 ${km(carKm)} のうち <b>${km(changed)}（${(changed / carKm * 100).toFixed(0)}%）</b>が 60→30 に変わったと推定`;
   if (!m && a.official) s += `。道路法上の道路に換算すると ${a.official.changed_share_pct[0]}〜${a.official.changed_share_pct[1]}%`;
-  if (m) s += `。市区町村への割り当ては線分の中点で行い、道路法換算は都道府県のみ`;
+  if (m) {
+    const r = muniRank.get(muni!);
+    if (r) s += `。変更率は全国 ${rankTotal.toLocaleString()} 市区町村中 <b>${r.toLocaleString()} 位</b>`;
+    s += `。市区町村への割り当ては線分の中点で行い、道路法換算は都道府県のみ`;
+  }
   s += `<span class="stat-meta">規制データ JARTIC ${a.jartic_month.slice(0, 4)}-${a.jartic_month.slice(4)} / 生成 ${a.generated}</span>`;
   statEl.innerHTML = s;
 }
 
 function setAll(on: boolean): void {
-  const st = MODES.find((m) => m.key === mode)!.style;
-  for (const s of st) on ? enabled[mode].add(s.value) : enabled[mode].delete(s.value);
+  if (on) off[mode].clear();
+  else for (const k of Object.keys(scopeTally())) off[mode].add(k);
   renderLegend();
   applyStyle();
 }
@@ -351,9 +455,27 @@ map.on("click", "roads", (e) => {
     .setHTML(`<div class="pop"><div class="pop-head">${esc(label("final", String(p.final)))}</div><table class="pop-tbl">${rows.join("")}</table></div>`)
     .addTo(map);
 });
+
+// 面をクリックしたらその市区町村を選ぶ。ホバーで名前と変更率を出す(マウスのある環境だけ)
+map.on("click", "muni-fill", (e) => {
+  const code = e.features?.[0]?.properties?.code as string | undefined;
+  if (code) selectMuni(code);
+});
 if (window.matchMedia("(hover: hover)").matches) {
   map.on("mouseenter", "roads", () => { map.getCanvas().style.cursor = "pointer"; });
   map.on("mouseleave", "roads", () => { map.getCanvas().style.cursor = ""; });
+  let hover: maplibregl.Popup | null = null;
+  map.on("mousemove", "muni-fill", (e) => {
+    const p = e.features?.[0]?.properties as Record<string, unknown> | undefined;
+    if (!p) return;
+    map.getCanvas().style.cursor = "pointer";
+    hover ??= new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 10, className: "pop-hover" });
+    hover
+      .setLngLat(e.lngLat)
+      .setHTML(`<div class="pop-mini"><b>${esc(p.name)}</b><span>${esc(p.pref_name)}</span><br>車道 ${km(Number(p.car_km))} / 変更 <b>${Math.round(Number(p.pct))}%</b></div>`)
+      .addTo(map);
+  });
+  map.on("mouseleave", "muni-fill", () => { map.getCanvas().style.cursor = ""; hover?.remove(); });
 }
 
 // ---- 初期化 ----
@@ -362,11 +484,12 @@ if (buildEl) buildEl.textContent = `build ${__BUILD_TIME__}`;
 renderThemeBtn();
 if (isMobile) panel.classList.add("collapsed"); // スマホは畳んで地図を広く
 renderCollapseBtn();
+renderScale();
 renderLegend();
 // 判定レイヤーは style.load ハンドラ(addDataLayers)が載せる。"load" はスプライト・全タイル待ちで遅いので使わない。
 // 初回だけ URL にハッシュが無ければエリアの既定ビューへ移動する(市区町村指定があればそちらへ寄せる)
 if (initialNoHash && !muni) map.once("style.load", () => map.jumpTo({ center: areas[current].view.center, zoom: areas[current].view.zoom }));
-void renderMuniSelect();
+void initMuni();
 
 // WebGL コンテキスト消失からの復帰(iOS Safari 等)
 const canvas = map.getCanvas();
