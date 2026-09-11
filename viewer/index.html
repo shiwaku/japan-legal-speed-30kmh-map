@@ -40,9 +40,14 @@
         <select id="area" class="select" aria-label="エリア"></select>
       </div>
 
-      <div class="field" id="muni-field" hidden>
-        <div class="field-head"><span class="field-label">市区町村</span></div>
-        <select id="muni" class="select" aria-label="市区町村"></select>
+      <div class="field">
+        <div class="field-head">
+          <span class="field-label">市区町村</span>
+          <div class="field-actions"><button id="muni-clear" class="mini-btn" type="button">解除</button></div>
+        </div>
+        <input id="muni-input" class="select" list="muni-list" type="search" placeholder="全国から検索（例: 川越市）"
+               autocomplete="off" enterkeyhint="search" aria-label="市区町村を検索" />
+        <datalist id="muni-list"></datalist>
       </div>
 
       <div class="field">
@@ -64,8 +69,13 @@
       <p id="stat" class="stat"></p>
 
       <label class="toggle option">
+        <input id="choropleth" type="checkbox" />
+        <span class="t-label">市区町村を変更率で色分け（ズーム 12 未満）</span>
+      </label>
+      <div id="muni-scale" class="scale" hidden></div>
+      <label class="toggle option">
         <input id="borders" type="checkbox" />
-        <span class="t-label">行政区域の境界を表示（国土数値情報 N03）</span>
+        <span class="t-label">行政区域の境界（国土数値情報 N03）</span>
       </label>
     </div>
 
