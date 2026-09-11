@@ -29,6 +29,7 @@ for f in sorted(common.AREAS.glob("pref_*.json")):
     m = manifest[key]
     m["kind"] = "prefecture"
     m["pref_code"] = cfg["pref_code"]
+    m["view"] = cfg["view"]  # areas/*.json 側を正とする(初期表示位置を直したら 05 を回さなくても反映)
     m["official_width"] = cfg.get("official_width")
     if args.tiles:
         m["tiles"] = args.tiles

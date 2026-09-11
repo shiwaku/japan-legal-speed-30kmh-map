@@ -49,7 +49,10 @@ for code in sorted(want):
     out = common.DATA / "areas" / key
     out.mkdir(parents=True, exist_ok=True)
     d.to_file(out / "boundary.geojson", driver="GeoJSON")
-    w, s, e, n = d.total_bounds
+    # 初期表示は bbox の中心でなく最大の島(本土部分)の重心にする(東京は小笠原まで bbox に入り、中心が海になる)
+    geom = d.geometry.iloc[0]
+    main = max(geom.geoms, key=lambda g_: g_.area) if geom.geom_type == "MultiPolygon" else geom
+    cx, cy = main.centroid.x, main.centroid.y
     epsg = EPSG[code]
     o = official[code]
     area = {
@@ -71,7 +74,7 @@ for code in sorted(want):
             "市区町村道": o["official_road_km"]["市区町村道"],
         },
         "official_width": {"_comment": "道路統計年報 表15 の幅員別実延長(km)と 5.5m 未満の割合", **o["width_km"], "share_lt_5_5m_pct": o["share_lt_5_5m_pct"]},
-        "view": {"center": [round((w + e) / 2, 4), round((s + n) / 2, 4)], "zoom": 9},
+        "view": {"center": [round(cx, 4), round(cy, 4)], "zoom": 9},
     }
     (common.AREAS / f"{key}.json").write_text(json.dumps(area, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"{key} {pname} EPSG:{epsg} area {d.to_crs(epsg).area.sum() / 1e6:,.0f} km2 official {o['official_road_km']['合計']:,.0f} km")

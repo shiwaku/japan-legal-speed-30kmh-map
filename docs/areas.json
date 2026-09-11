@@ -9,7 +9,7 @@
       ],
       "zoom": 5
     },
-    "tiles": null,
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles",
     "jartic_month": "202607",
     "buffer_m": 10.0,
     "generated": "2026-09-11",
@@ -90,8 +90,8 @@
     "name": "北海道",
     "view": {
       "center": [
-        144.1142,
-        43.4544
+        142.5712,
+        43.3834
       ],
       "zoom": 9
     },
@@ -175,14 +175,15 @@
       "未改良_3.5m未満": 11458.2,
       "うち自動車交通不能": 719.2,
       "share_lt_5_5m_pct": 47.0
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_02": {
     "name": "青森県",
     "view": {
       "center": [
-        140.5901,
-        40.8869
+        140.8283,
+        40.783
       ],
       "zoom": 9
     },
@@ -263,14 +264,15 @@
       "未改良_3.5m未満": 4940.2,
       "うち自動車交通不能": 1051.9,
       "share_lt_5_5m_pct": 61.8
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_03": {
     "name": "岩手県",
     "view": {
       "center": [
-        141.3628,
-        39.599
+        141.3595,
+        39.5961
       ],
       "zoom": 9
     },
@@ -354,14 +356,15 @@
       "未改良_3.5m未満": 9413.0,
       "うち自動車交通不能": 2416.8,
       "share_lt_5_5m_pct": 70.6
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_04": {
     "name": "宮城県",
     "view": {
       "center": [
-        140.9761,
-        38.388
+        140.9229,
+        38.4495
       ],
       "zoom": 9
     },
@@ -444,14 +447,15 @@
       "未改良_3.5m未満": 4851.8,
       "うち自動車交通不能": 1467.4,
       "share_lt_5_5m_pct": 67.5
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_05": {
     "name": "秋田県",
     "view": {
       "center": [
-        140.3436,
-        39.6921
+        140.4052,
+        39.7523
       ],
       "zoom": 9
     },
@@ -526,14 +530,15 @@
       "未改良_3.5m未満": 5773.3,
       "うち自動車交通不能": 1059.3,
       "share_lt_5_5m_pct": 68.6
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_06": {
     "name": "山形県",
     "view": {
       "center": [
-        140.0833,
-        38.4747
+        140.0998,
+        38.4501
       ],
       "zoom": 9
     },
@@ -610,14 +615,15 @@
       "未改良_3.5m未満": 3275.2,
       "うち自動車交通不能": 457.7,
       "share_lt_5_5m_pct": 60.4
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_07": {
     "name": "福島県",
     "view": {
       "center": [
-        140.1054,
-        37.384
+        140.2223,
+        37.3818
       ],
       "zoom": 9
     },
@@ -694,14 +700,15 @@
       "未改良_3.5m未満": 13156.0,
       "うち自動車交通不能": 5287.0,
       "share_lt_5_5m_pct": 75.9
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_08": {
     "name": "茨城県",
     "view": {
       "center": [
-        140.2698,
-        36.3422
+        140.3162,
+        36.3104
       ],
       "zoom": 9
     },
@@ -781,14 +788,15 @@
       "未改良_3.5m未満": 26684.5,
       "うち自動車交通不能": 15606.1,
       "share_lt_5_5m_pct": 82.4
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_09": {
     "name": "栃木県",
     "view": {
       "center": [
-        139.8094,
-        36.6774
+        139.8161,
+        36.6926
       ],
       "zoom": 9
     },
@@ -868,14 +876,15 @@
       "未改良_3.5m未満": 5913.0,
       "うち自動車交通不能": 1640.4,
       "share_lt_5_5m_pct": 71.0
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_10": {
     "name": "群馬県",
     "view": {
       "center": [
-        139.0335,
-        36.522
+        138.9823,
+        36.5075
       ],
       "zoom": 9
     },
@@ -956,14 +965,15 @@
       "未改良_3.5m未満": 13933.9,
       "うち自動車交通不能": 8533.4,
       "share_lt_5_5m_pct": 79.6
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_11": {
     "name": "埼玉県",
     "view": {
       "center": [
-        139.3058,
-        36.0184
+        139.3446,
+        35.9997
       ],
       "zoom": 9
     },
@@ -1049,14 +1059,15 @@
       "未改良_3.5m未満": 16991.7,
       "うち自動車交通不能": 10288.3,
       "share_lt_5_5m_pct": 80.4
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_12": {
     "name": "千葉県",
     "view": {
       "center": [
-        140.3106,
-        35.501
+        140.2012,
+        35.5169
       ],
       "zoom": 9
     },
@@ -1141,14 +1152,15 @@
       "未改良_3.5m未満": 12106.3,
       "うち自動車交通不能": 3965.5,
       "share_lt_5_5m_pct": 76.9
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_13": {
     "name": "東京都",
     "view": {
       "center": [
-        145.0281,
-        28.1606
+        139.4341,
+        35.7155
       ],
       "zoom": 9
     },
@@ -1225,14 +1237,15 @@
       "未改良_3.5m未満": 5500.2,
       "うち自動車交通不能": 3102.2,
       "share_lt_5_5m_pct": 68.5
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_14": {
     "name": "神奈川県",
     "view": {
       "center": [
-        139.3758,
-        35.4007
+        139.3344,
+        35.417
       ],
       "zoom": 9
     },
@@ -1308,14 +1321,15 @@
       "未改良_3.5m未満": 4128.4,
       "うち自動車交通不能": 2263.9,
       "share_lt_5_5m_pct": 78.4
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_15": {
     "name": "新潟県",
     "view": {
       "center": [
-        138.7674,
-        37.6451
+        138.9559,
+        37.4843
       ],
       "zoom": 9
     },
@@ -1395,14 +1409,15 @@
       "未改良_3.5m未満": 7839.2,
       "うち自動車交通不能": 2346.4,
       "share_lt_5_5m_pct": 67.1
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_16": {
     "name": "富山県",
     "view": {
       "center": [
-        137.2659,
-        36.6285
+        137.2652,
+        36.6393
       ],
       "zoom": 9
     },
@@ -1485,14 +1500,15 @@
       "未改良_3.5m未満": 2007.2,
       "うち自動車交通不能": 330.1,
       "share_lt_5_5m_pct": 59.5
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_17": {
     "name": "石川県",
     "view": {
       "center": [
-        136.8036,
-        36.9626
+        136.768,
+        36.7671
       ],
       "zoom": 9
     },
@@ -1573,14 +1589,15 @@
       "未改良_3.5m未満": 2316.2,
       "うち自動車交通不能": 451.7,
       "share_lt_5_5m_pct": 59.8
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_18": {
     "name": "福井県",
     "view": {
       "center": [
-        136.1409,
-        35.8203
+        136.2251,
+        35.8501
       ],
       "zoom": 9
     },
@@ -1656,14 +1673,15 @@
       "未改良_3.5m未満": 1859.0,
       "うち自動車交通不能": 372.2,
       "share_lt_5_5m_pct": 61.8
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_19": {
     "name": "山梨県",
     "view": {
       "center": [
-        138.6573,
-        35.57
+        138.6085,
+        35.6154
       ],
       "zoom": 9
     },
@@ -1743,14 +1761,15 @@
       "未改良_3.5m未満": 3267.2,
       "うち自動車交通不能": 1492.6,
       "share_lt_5_5m_pct": 72.3
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_20": {
     "name": "長野県",
     "view": {
       "center": [
-        138.0319,
-        36.1144
+        138.0433,
+        36.1362
       ],
       "zoom": 9
     },
@@ -1826,14 +1845,15 @@
       "未改良_3.5m未満": 20300.8,
       "うち自動車交通不能": 10660.5,
       "share_lt_5_5m_pct": 80.5
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_21": {
     "name": "岐阜県",
     "view": {
       "center": [
-        136.9646,
-        35.7994
+        137.054,
+        35.7809
       ],
       "zoom": 9
     },
@@ -1916,14 +1936,15 @@
       "未改良_3.5m未満": 9828.3,
       "うち自動車交通不能": 2151.8,
       "share_lt_5_5m_pct": 72.9
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_22": {
     "name": "静岡県",
     "view": {
       "center": [
-        138.3253,
-        35.109
+        138.3273,
+        35.0202
       ],
       "zoom": 9
     },
@@ -2003,14 +2024,15 @@
       "未改良_3.5m未満": 8531.0,
       "うち自動車交通不能": 3294.7,
       "share_lt_5_5m_pct": 72.5
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_23": {
     "name": "愛知県",
     "view": {
       "center": [
-        137.2546,
-        34.9992
+        137.212,
+        35.0373
       ],
       "zoom": 9
     },
@@ -2089,14 +2111,15 @@
       "未改良_3.5m未満": 12719.1,
       "うち自動車交通不能": 3737.8,
       "share_lt_5_5m_pct": 72.8
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_24": {
     "name": "三重県",
     "view": {
       "center": [
-        136.4216,
-        34.4903
+        136.3781,
+        34.5187
       ],
       "zoom": 9
     },
@@ -2176,14 +2199,15 @@
       "未改良_3.5m未満": 9541.8,
       "うち自動車交通不能": 3435.0,
       "share_lt_5_5m_pct": 75.3
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_25": {
     "name": "滋賀県",
     "view": {
       "center": [
-        136.1094,
-        35.2472
+        136.1352,
+        35.2189
       ],
       "zoom": 9
     },
@@ -2266,14 +2290,15 @@
       "未改良_3.5m未満": 3230.9,
       "うち自動車交通不能": 609.6,
       "share_lt_5_5m_pct": 66.2
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_26": {
     "name": "京都府",
     "view": {
       "center": [
-        135.4546,
-        35.2425
+        135.4417,
+        35.2554
       ],
       "zoom": 9
     },
@@ -2353,14 +2378,15 @@
       "未改良_3.5m未満": 4284.3,
       "うち自動車交通不能": 1712.3,
       "share_lt_5_5m_pct": 72.5
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_27": {
     "name": "大阪府",
     "view": {
       "center": [
-        135.419,
-        34.6616
+        135.5087,
+        34.6261
       ],
       "zoom": 9
     },
@@ -2441,14 +2467,15 @@
       "未改良_3.5m未満": 2778.4,
       "うち自動車交通不能": 948.4,
       "share_lt_5_5m_pct": 70.9
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_28": {
     "name": "兵庫県",
     "view": {
       "center": [
-        134.8607,
-        34.915
+        134.8247,
+        35.0941
       ],
       "zoom": 9
     },
@@ -2531,14 +2558,15 @@
       "未改良_3.5m未満": 9261.2,
       "うち自動車交通不能": 2965.9,
       "share_lt_5_5m_pct": 72.0
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_29": {
     "name": "奈良県",
     "view": {
       "center": [
-        135.8848,
-        34.3202
+        135.8687,
+        34.3193
       ],
       "zoom": 9
     },
@@ -2614,14 +2642,15 @@
       "未改良_3.5m未満": 5304.4,
       "うち自動車交通不能": 2576.1,
       "share_lt_5_5m_pct": 78.4
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_30": {
     "name": "和歌山県",
     "view": {
       "center": [
-        135.506,
-        33.9085
+        135.5041,
+        33.9137
       ],
       "zoom": 9
     },
@@ -2701,14 +2730,15 @@
       "未改良_3.5m未満": 6123.6,
       "うち自動車交通不能": 2665.5,
       "share_lt_5_5m_pct": 76.6
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_31": {
     "name": "鳥取県",
     "view": {
       "center": [
-        133.8256,
-        35.3361
+        133.8499,
+        35.3628
       ],
       "zoom": 9
     },
@@ -2784,14 +2814,15 @@
       "未改良_3.5m未満": 2217.1,
       "うち自動車交通不能": 710.2,
       "share_lt_5_5m_pct": 63.8
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_32": {
     "name": "島根県",
     "view": {
       "center": [
-        132.5293,
-        35.7751
+        132.5254,
+        35.0149
       ],
       "zoom": 9
     },
@@ -2871,14 +2902,15 @@
       "未改良_3.5m未満": 6748.1,
       "うち自動車交通不能": 2066.8,
       "share_lt_5_5m_pct": 74.3
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_33": {
     "name": "岡山県",
     "view": {
       "center": [
-        133.84,
-        34.8257
+        133.8124,
+        34.9058
       ],
       "zoom": 9
     },
@@ -2962,14 +2994,15 @@
       "未改良_3.5m未満": 11902.8,
       "うち自動車交通不能": 5744.3,
       "share_lt_5_5m_pct": 80.5
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_34": {
     "name": "広島県",
     "view": {
       "center": [
-        132.7535,
-        34.5667
+        132.7878,
+        34.6267
       ],
       "zoom": 9
     },
@@ -3050,14 +3083,15 @@
       "未改良_3.5m未満": 8596.2,
       "うち自動車交通不能": 2369.3,
       "share_lt_5_5m_pct": 71.1
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_35": {
     "name": "山口県",
     "view": {
       "center": [
-        131.6335,
-        34.256
+        131.554,
+        34.2114
       ],
       "zoom": 9
     },
@@ -3134,14 +3168,15 @@
       "未改良_3.5m未満": 5265.9,
       "うち自動車交通不能": 1064.1,
       "share_lt_5_5m_pct": 68.6
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_36": {
     "name": "徳島県",
     "view": {
       "center": [
-        134.2415,
-        33.8953
+        134.2388,
+        33.9206
       ],
       "zoom": 9
     },
@@ -3217,14 +3252,15 @@
       "未改良_3.5m未満": 7064.7,
       "うち自動車交通不能": 2319.1,
       "share_lt_5_5m_pct": 83.4
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_37": {
     "name": "香川県",
     "view": {
       "center": [
-        133.947,
-        34.2886
+        133.9736,
+        34.2155
       ],
       "zoom": 9
     },
@@ -3299,14 +3335,15 @@
       "未改良_3.5m未満": 3058.9,
       "うち自動車交通不能": 647.1,
       "share_lt_5_5m_pct": 71.4
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_38": {
     "name": "愛媛県",
     "view": {
       "center": [
-        132.8526,
-        33.5933
+        132.852,
+        33.6061
       ],
       "zoom": 9
     },
@@ -3384,14 +3421,15 @@
       "未改良_3.5m未満": 6935.1,
       "うち自動車交通不能": 1693.3,
       "share_lt_5_5m_pct": 76.0
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_39": {
     "name": "高知県",
     "view": {
       "center": [
-        133.3972,
-        33.2929
+        133.3677,
+        33.426
       ],
       "zoom": 9
     },
@@ -3470,14 +3508,15 @@
       "未改良_3.5m未満": 5977.4,
       "うち自動車交通不能": 1524.9,
       "share_lt_5_5m_pct": 78.6
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_40": {
     "name": "福岡県",
     "view": {
       "center": [
-        130.586,
-        33.6251
+        130.6674,
+        33.5247
       ],
       "zoom": 9
     },
@@ -3559,14 +3598,15 @@
       "未改良_3.5m未満": 8218.1,
       "うち自動車交通不能": 3112.4,
       "share_lt_5_5m_pct": 73.6
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_41": {
     "name": "佐賀県",
     "view": {
       "center": [
-        130.1395,
-        33.2847
+        130.1161,
+        33.287
       ],
       "zoom": 9
     },
@@ -3645,14 +3685,15 @@
       "未改良_3.5m未満": 2358.9,
       "うち自動車交通不能": 1049.8,
       "share_lt_5_5m_pct": 67.7
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_42": {
     "name": "長崎県",
     "view": {
       "center": [
-        129.2474,
-        33.3479
+        129.9302,
+        32.9441
       ],
       "zoom": 9
     },
@@ -3731,14 +3772,15 @@
       "未改良_3.5m未満": 6636.5,
       "うち自動車交通不能": 2332.9,
       "share_lt_5_5m_pct": 74.1
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_43": {
     "name": "熊本県",
     "view": {
       "center": [
-        130.6341,
-        32.645
+        130.8312,
+        32.6468
       ],
       "zoom": 9
     },
@@ -3817,14 +3859,15 @@
       "未改良_3.5m未満": 5899.9,
       "うち自動車交通不能": 993.3,
       "share_lt_5_5m_pct": 71.5
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_44": {
     "name": "大分県",
     "view": {
       "center": [
-        131.5011,
-        33.2274
+        131.4304,
+        33.2028
       ],
       "zoom": 9
     },
@@ -3904,14 +3947,15 @@
       "未改良_3.5m未満": 4748.5,
       "うち自動車交通不能": 1691.6,
       "share_lt_5_5m_pct": 67.9
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_45": {
     "name": "宮崎県",
     "view": {
       "center": [
-        131.2945,
-        32.0974
+        131.2986,
+        32.1957
       ],
       "zoom": 9
     },
@@ -3988,14 +4032,15 @@
       "未改良_3.5m未満": 5670.6,
       "うち自動車交通不能": 1146.2,
       "share_lt_5_5m_pct": 72.3
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_46": {
     "name": "鹿児島県",
     "view": {
       "center": [
-        129.8004,
-        29.6646
+        130.6313,
+        31.6375
       ],
       "zoom": 9
     },
@@ -4075,14 +4120,15 @@
       "未改良_3.5m未満": 4689.2,
       "うち自動車交通不能": 659.7,
       "share_lt_5_5m_pct": 65.6
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "pref_47": {
     "name": "沖縄県",
     "view": {
       "center": [
-        127.1324,
-        25.9658
+        127.9591,
+        26.4946
       ],
       "zoom": 9
     },
@@ -4158,7 +4204,8 @@
       "未改良_3.5m未満": 1366.5,
       "うち自動車交通不能": 76.4,
       "share_lt_5_5m_pct": 56.7
-    }
+    },
+    "tiles": "https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles"
   },
   "kawagoe": {
     "name": "川越市",
