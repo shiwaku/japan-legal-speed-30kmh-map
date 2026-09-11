@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <title>この道、60→30？</title>
+  <meta name="description" content="2026-09-01 施行の生活道路 30 km/h で法定速度が 60→30 に変わった道路(推定)を表示する地図" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#d62728" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="この道、60→30？" />
+</head>
+<body>
+  <div id="map"></div>
+
+  <section id="panel" class="panel" aria-label="コントロールパネル">
+    <header class="panel-head">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">🚗</span>
+        <h1>この道、60→30？</h1>
+      </div>
+      <div class="head-actions">
+        <button id="theme-btn" class="icon-btn" type="button" title="テーマ切替" aria-label="テーマ切替"></button>
+        <button id="collapse-btn" class="icon-btn" type="button" title="パネル開閉" aria-label="パネル開閉"></button>
+      </div>
+    </header>
+
+    <div id="panel-body" class="panel-body">
+      <p class="lead">
+        中央線・車両通行帯・中央分離帯のない道路の法定速度が 60→30 km/h に（2026-09-01 施行）。
+        どの道が変わったかを公開データから<b>推定</b>した地図です。
+      </p>
+
+      <div class="field">
+        <div class="field-head"><span class="field-label">エリア</span></div>
+        <select id="area" class="select" aria-label="エリア"></select>
+      </div>
+
+      <div class="field">
+        <div class="field-head"><span class="field-label">表示</span></div>
+        <div id="mode" class="segmented" role="tablist" aria-label="表示の切替"></div>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <span class="field-label">凡例</span>
+          <div class="field-actions">
+            <button id="all-on" class="mini-btn" type="button">全ON</button>
+            <button id="all-off" class="mini-btn" type="button">全OFF</button>
+          </div>
+        </div>
+        <div id="legend" class="toggles"></div>
+      </div>
+
+      <p id="stat" class="stat"></p>
+    </div>
+
+    <footer class="panel-foot">
+      <p class="disclaimer">推定です。標識の現地確認に代わるものではありません。</p>
+      <a href="https://github.com/shiwaku/japan-legal-speed-30kmh-map/blob/main/docs/premise.md" target="_blank" rel="noopener">前提と限界</a> ・
+      <a href="https://github.com/shiwaku/japan-legal-speed-30kmh-map/blob/main/docs/glossary.md" target="_blank" rel="noopener">用語集</a> ・
+      <a href="https://github.com/shiwaku/japan-legal-speed-30kmh-map" target="_blank" rel="noopener">判定方法・コード</a><br />
+      データ: <a href="https://github.com/gsi-cyberjapan/gsimaps-vector-experiment" target="_blank" rel="noopener">国土地理院 ベクトルタイル提供実験</a> /
+      <a href="https://www.jartic.or.jp/service/opendata/" target="_blank" rel="noopener">JARTIC 交通規制情報</a> /
+      背景: <a href="https://github.com/gsi-cyberjapan/optimal_bvmap" target="_blank" rel="noopener">最適化ベクトルタイル</a>
+      <span id="build-ver" class="build-ver"></span>
+    </footer>
+  </section>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

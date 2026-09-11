@@ -1,6 +1,6 @@
-"""全国版の集計: docs/areas.json の 47 都道府県から全国合計を作り、都道府県一覧(CSV/Markdown)を出す。
+"""全国版の集計: viewer/public/areas.json の 47 都道府県から全国合計を作り、都道府県一覧(CSV/Markdown)を出す。
 
-- docs/areas.json の pref_XX に kind / pref_code / tiles(全国 PMTiles の URL) を補い、"japan" エントリ(全国合計)を足す
+- viewer/public/areas.json の pref_XX に kind / pref_code / tiles(全国 PMTiles の URL) を補い、"japan" エントリ(全国合計)を足す
 - out/national/prefectures.csv, out/national/prefectures.md: 都道府県別の 60→30 割合と道路統計との比較
 
     uv run python scripts/make_national_summary.py --tiles https://.../japan-legal-speed-30kmh.pmtiles
@@ -24,7 +24,7 @@ for f in sorted(common.AREAS.glob("pref_*.json")):
     cfg = json.loads(f.read_text(encoding="utf-8"))
     key = f.stem
     if key not in manifest:
-        print(f"{key} {cfg['name']}: 未処理(docs/areas.json に無い)")
+        print(f"{key} {cfg['name']}: 未処理(viewer/public/areas.json に無い)")
         continue
     m = manifest[key]
     m["kind"] = "prefecture"

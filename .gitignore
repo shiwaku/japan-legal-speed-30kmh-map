@@ -31,3 +31,7 @@ out/*.log
 
 # macOS
 .DS_Store
+
+# ビューワ(Vite)
+viewer/node_modules/
+viewer/dist/

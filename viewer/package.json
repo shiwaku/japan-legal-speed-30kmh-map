@@ -1,0 +1,21 @@
+{
+  "name": "japan-legal-speed-30kmh-map-viewer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "生活道路 30 km/h で法定速度が 60→30 に変わった道路(推定)を表示するビューワ",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "maplibre-gl": "^5.15.0",
+    "pmtiles": "^4.3.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "vite": "^6.0.0"
+  }
+}

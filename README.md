@@ -12,7 +12,7 @@
 
 **https://shiwaku.github.io/japan-legal-speed-30kmh-map/**
 
-`docs/index.html`（MapLibre GL JS + PMTiles）。エリアをプルダウンで切り替え、**「判定 / 改正前の速度 / 改正後の速度」**をタブ（または <kbd>B</kbd> キー）で切り替えられます。改正前は標識の無い一般道が一様に 60 km/h（青）で、改正後にその大半が 30 km/h（赤）に変わるのが見えます。凡例のチェックで表示クラスを絞り、道路をクリックすると判定根拠（改正前後の速度・幅員区分・規制の重なり率）が出ます。
+`viewer/`（Vite + TypeScript + MapLibre GL JS + PMTiles。[dm-converter/viewer](https://github.com/shiwaku/dm-converter/tree/main/viewer) と同じ構成）。エリアをプルダウンで切り替え、**「判定 / 改正前の速度 / 改正後の速度」**をタブ（または <kbd>B</kbd> キー）で切り替えられます。改正前は標識の無い一般道が一様に 60 km/h（青）で、改正後にその大半が 30 km/h（赤）に変わるのが見えます。凡例のチェックで表示クラスを絞り、道路をクリックすると判定根拠（改正前後の速度・幅員区分・規制の重なり率）が出ます。
 
 ![川越市の判定図](out/kawagoe/final.png)
 
@@ -133,9 +133,30 @@ uv run python scripts/04_extract_jartic.py   --area kawagoe --jartic data/jartic
 uv run python scripts/05_match_regulation.py --area kawagoe --buffer 10 --save
 # 6. PMTiles  (tippecanoe。Windows は WSL2 で)
 wsl bash scripts/06_build_pmtiles.sh kawagoe
-# 表示  (python -m http.server は Range 非対応で PMTiles を読めない)
-uv run python -m RangeHTTPServer 8765 --bind 127.0.0.1   # → http://127.0.0.1:8765/docs/
 ```
+
+### ビューワ（`viewer/`）
+
+```bash
+cd viewer
+npm install
+npm run dev       # http://localhost:5175/ （public/ の areas.json・tiles/ をそのまま読む）
+npm run build     # 型チェック + dist/ 生成
+npm run preview   # dist/ を本番と同じ base(/japan-legal-speed-30kmh-map/) で確認
+```
+
+`viewer/public/` にビューワが読む静的ファイルを置く。`areas.json`（05 と make_national_summary が書く）、`tiles/<area>.pmtiles`（06）、`pale.json` / `std.json`（make_pale_style）。
+main に `viewer/**` の変更が入ると `.github/workflows/deploy-viewer.yml` がビルドして GitHub Pages に配信する。
+
+| 機能 | 内容 |
+|---|---|
+| エリア | 全国 / 都道府県 / 市区町村をプルダウンで切替。都道府県・全国は R2 の全国 PMTiles、市区町村は `public/tiles/` |
+| 表示 | 判定 / 改正前の速度 / 改正後の速度（<kbd>B</kbd> で前後トグル） |
+| 凡例 | 区分ごとに表示 ON/OFF、延長 km を併記。全ON/全OFF |
+| 背景 | 淡色 / 標準（地理院 最適化ベクトルタイル）/ 写真（地理院 全国最新写真）/ 白図 |
+| テーマ | ライト / ダーク。初回は OS 設定、以降は localStorage |
+| スマホ | 640px 以下はボトムシート。初期は畳んで地図を広く。保持タイル数と描画解像度を絞って WebGL コンテキスト消失を防ぐ |
+| PWA | manifest + アイコン。Service Worker は index.html だけネットワーク優先（Pages の 10 分キャッシュ対策）、タイルには介入しない |
 
 ### JARTIC 交通規制情報の用意
 
@@ -169,7 +190,8 @@ data/
   jartic/<yyyymm>/          converter の GeoJSONL（ignore）
 out/<key>/                  roads_z16.parquet, roads_city.geojson, final.{parquet,geojson}（ignore）
                             summary_*.csv, final.png（コミット）
-docs/                       GitHub Pages: index.html, areas.json, tiles/<key>.pmtiles, style/pale.json（背景地図スタイル）
+viewer/                     ビューワ（Vite + TS）。public/ に areas.json, tiles/<key>.pmtiles, pale.json, std.json
+docs/                       premise.md（前提と限界）, glossary.md（用語集）
 ```
 
 ## 実データで分かったこと
@@ -204,4 +226,4 @@ docs/                       GitHub Pages: index.html, areas.json, tiles/<key>.pm
 - [札幌市認定路線網図](https://ckan.pf-sapporo.jp/dataset/sapporo_authorized_road)（CC BY 4.0、道路法の認定路線・幅員つき）
 - 背景地図: [国土地理院 最適化ベクトルタイル](https://github.com/gsi-cyberjapan/optimal_bvmap)（`optimal_bvmap-v1` PMTiles）。標準スタイル `std.json` を `scripts/make_pale_style.py` で淡色化した `docs/style/pale.json` で描画。スプライト・グリフは地理院のものを参照
 
-コードは Apache License 2.0（[LICENSE](LICENSE)）。`docs/tiles/*.pmtiles` と `out/` の集計は上記データの派生物で、それぞれの利用規約に従います。
+コードは Apache License 2.0（[LICENSE](LICENSE)）。`viewer/public/tiles/*.pmtiles`・全国 PMTiles と `out/` の集計は上記データの派生物で、それぞれの利用規約に従います。
