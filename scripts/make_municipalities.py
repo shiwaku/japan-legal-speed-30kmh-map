@@ -32,7 +32,10 @@ OUT_PTS = common.DATA / "n03" / "municipalities_points.fgb"
 with zipfile.ZipFile(N03_ZIP) as z:
     shp = next(n for n in z.namelist() if n.endswith(".shp"))
 n03 = gpd.read_file(f"zip://{N03_ZIP}!{shp}", encoding="utf-8").to_crs(4326)
-n03 = n03[n03["N03_007"].notna()].copy()  # 所属未定地はコード無し
+n03 = n03[n03["N03_007"].notna()].copy()
+# 「所属未定地」はコードが都道府県+000(千葉 12000・東京 13000 の中央防波堤埋立地・沖縄 47000)。
+# 市区町村ではないので集計・面塗り・順位から外す
+n03 = n03[~n03["N03_007"].astype(str).str.zfill(5).str.endswith("000")].copy()
 n03["code"] = n03["N03_007"].astype(str).str.zfill(5)
 n03["pref_code"] = n03["code"].str[:2]
 n03["pref_name"] = n03["N03_001"]
@@ -40,6 +43,10 @@ n03["city"] = n03["N03_004"].fillna("")
 n03["ward"] = n03["N03_005"].fillna("")
 n03["name"] = n03["city"] + n03["ward"]
 print(f"N03: {len(n03)} polygons, {n03['code'].nunique()} codes")
+# 市区町村数の内訳(政令市は 1 市として数える)。総務省の市区町村数 1,741 +
+# 北方領土 6 村(N03 に含まれる)= 1,747 になるはず
+_kinds = n03.drop_duplicates("code")["name"].str[-1].value_counts().to_dict()
+print(f"  内訳(末尾の字): {_kinds}")
 
 # 境界(コードで結合)。政令市の市全体も 1 つの地物にする
 muni = n03.dissolve(by="code", aggfunc={"name": "first", "pref_code": "first", "pref_name": "first", "city": "first", "ward": "first"}).reset_index()
