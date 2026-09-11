@@ -72,7 +72,12 @@ const paint = () => {
   } as Record<string, unknown>;
 };
 
+// setStyle 直後はスタイル読込中で addSource が例外になる。読込完了は style.load 側で拾って載せ直す
+let styleReady = false;
+map.on("style.load", () => { styleReady = true; addDataLayers(); });
+
 function addDataLayers(): void {
+  if (!styleReady) return;
   const a = areas[current];
   if (map.getSource("roads")) {
     for (const id of ["roads", "roads-casing"]) if (map.getLayer(id)) map.removeLayer(id);
@@ -102,10 +107,11 @@ function applyStyle(): void {
   map.setFilter("roads-casing", ["all", emphasized(), ["in", ["get", mode], list]] as unknown as maplibregl.FilterSpecification);
 }
 
-// ---- テーマ・背景の切替(setStyle で全レイヤーが消えるので idle 後に貼り直す) ----
+// ---- テーマ・背景の切替(setStyle で全レイヤーが消えるので style.load 後に貼り直す) ----
 async function reloadStyle(): Promise<void> {
-  map.setStyle(await getBasemapStyle(base, theme), { diff: false });
-  map.once("idle", addDataLayers);
+  const style = await getBasemapStyle(base, theme);
+  styleReady = false;
+  map.setStyle(style, { diff: false });
 }
 
 const themeBtn = document.getElementById("theme-btn") as HTMLButtonElement;
@@ -278,13 +284,14 @@ renderThemeBtn();
 if (isMobile) panel.classList.add("collapsed"); // スマホは畳んで地図を広く
 renderCollapseBtn();
 renderLegend();
-// "load" はスプライト・全タイル待ちで遅いので、スタイルが読めた時点で判定レイヤーを載せる
-map.once("style.load", () => setArea(current, location.hash.length <= 1));
+// 判定レイヤーは style.load ハンドラ(addDataLayers)が載せる。"load" はスプライト・全タイル待ちで遅いので使わない。
+// 初回だけ URL にハッシュが無ければエリアの既定ビューへ移動する
+if (location.hash.length <= 1) map.once("style.load", () => map.jumpTo({ center: areas[current].view.center, zoom: areas[current].view.zoom }));
 
 // WebGL コンテキスト消失からの復帰(iOS Safari 等)
 const canvas = map.getCanvas();
 canvas.addEventListener("webglcontextlost", (ev) => ev.preventDefault(), false);
-canvas.addEventListener("webglcontextrestored", () => { if (map.isStyleLoaded()) addDataLayers(); else map.once("idle", addDataLayers); }, false);
+canvas.addEventListener("webglcontextrestored", () => addDataLayers(), false);
 
 (window as unknown as { __map: maplibregl.Map }).__map = map;
 
