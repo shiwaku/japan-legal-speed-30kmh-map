@@ -96,3 +96,16 @@ export interface AreaInfo {
   } | null;
   official_width?: { share_lt_5_5m_pct?: number } | null;
 }
+
+/** public/municipalities.json の 1 市区町村(scripts/make_municipalities.py が書く)。政令市は区と市全体(コード XX1x0)の両方がある。 */
+export interface MuniInfo {
+  name: string;
+  pref_code: string;
+  city: string;
+  ward: string;
+  bbox: [number, number, number, number];
+  total_km: number;
+  classes: Record<string, number>;
+  speed_before: Record<string, number>;
+  speed_after: Record<string, number>;
+}

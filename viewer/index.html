@@ -40,6 +40,11 @@
         <select id="area" class="select" aria-label="エリア"></select>
       </div>
 
+      <div class="field" id="muni-field" hidden>
+        <div class="field-head"><span class="field-label">市区町村</span></div>
+        <select id="muni" class="select" aria-label="市区町村"></select>
+      </div>
+
       <div class="field">
         <div class="field-head"><span class="field-label">表示</span></div>
         <div id="mode" class="segmented" role="tablist" aria-label="表示の切替"></div>
@@ -57,6 +62,11 @@
       </div>
 
       <p id="stat" class="stat"></p>
+
+      <label class="toggle option">
+        <input id="borders" type="checkbox" />
+        <span class="t-label">行政区域の境界を表示（国土数値情報 N03）</span>
+      </label>
     </div>
 
     <footer class="panel-foot">

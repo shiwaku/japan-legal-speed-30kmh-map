@@ -145,12 +145,14 @@ npm run build     # 型チェック + dist/ 生成
 npm run preview   # dist/ を本番と同じ base(/japan-legal-speed-30kmh-map/) で確認
 ```
 
-`viewer/public/` にビューワが読む静的ファイルを置く。`areas.json`（05 と make_national_summary が書く）、`tiles/<area>.pmtiles`（06）、`pale.json` / `std.json`（make_pale_style）。
+`viewer/public/` にビューワが読む静的ファイルを置く。`areas.json`（05 と make_national_summary が書く）、`tiles/<area>.pmtiles`（06）、`municipalities.json` と `tiles/municipalities.pmtiles`（make_municipalities.py → 06_build_municipalities_pmtiles.sh。市区町村別の集計と国土数値情報 N03 の境界）、`pale.json` / `std.json`（make_pale_style）。
 main に `viewer/**` の変更が入ると `.github/workflows/deploy-viewer.yml` がビルドして GitHub Pages に配信する。
 
 | 機能 | 内容 |
 |---|---|
 | エリア | 全国 / 都道府県 / 市区町村をプルダウンで切替。都道府県・全国は R2 の全国 PMTiles、市区町村は `public/tiles/` |
+| 市区町村 | 都道府県を選ぶと市区町村（政令市は市全体と区）のプルダウンが出る。選ぶとその範囲へ寄せ、輪郭を強調し、凡例と要約をその市区町村の集計に切り替える（`?area=pref_11&muni=11201`）。集計は線分の中点で市区町村に割り当てたもので、道路統計との比較（道路法換算）は都道府県単位のみ |
+| 行政区域 | 国土数値情報 N03-20240101 の市区町村境界を線で重ねる（パネル下のチェックで ON/OFF） |
 | 表示 | 判定 / 改正前の速度 / 改正後の速度（<kbd>B</kbd> で前後トグル） |
 | 凡例 | 区分ごとに表示 ON/OFF、延長 km を併記。全ON/全OFF |
 | 背景 | 淡色 / 標準（地理院 最適化ベクトルタイル）/ 写真（地理院 全国最新写真）/ 白図 |
@@ -182,7 +184,8 @@ areas/<key>.json            エリア定義（名称・EPSG・市域の URL・�
 scripts/
   common.py                 パス規約と判定ロジック（ここだけテストされる）
   01_list_tiles.py … 06_build_pmtiles.sh
-  make_pale_style.py        地理院 最適化ベクトルタイル std.json → 淡色スタイル docs/style/pale.json
+  make_pale_style.py        地理院 最適化ベクトルタイル std.json → 淡色スタイル viewer/public/pale.json
+  make_municipalities.py    市区町村別集計 viewer/public/municipalities.json と境界 data/n03/municipalities.fgb（→ 06_build_municipalities_pmtiles.sh）
 tests/test_classify.py
 data/
   areas/<key>/              boundary.geojson, tiles_z16.csv（コミット）, jartic_*.geojson（04 の出力、ignore）
@@ -190,7 +193,7 @@ data/
   jartic/<yyyymm>/          converter の GeoJSONL（ignore）
 out/<key>/                  roads_z16.parquet, roads_city.geojson, final.{parquet,geojson}（ignore）
                             summary_*.csv, final.png（コミット）
-viewer/                     ビューワ（Vite + TS）。public/ に areas.json, tiles/<key>.pmtiles, pale.json, std.json
+viewer/                     ビューワ（Vite + TS）。public/ に areas.json, municipalities.json, tiles/<key>.pmtiles, tiles/municipalities.pmtiles, pale.json, std.json
 docs/                       premise.md（前提と限界）, glossary.md（用語集）
 ```
 
@@ -221,7 +224,7 @@ docs/                       premise.md（前提と限界）, glossary.md（用�
 - 国土地理院 [ベクトルタイル提供実験](https://github.com/gsi-cyberjapan/gsimaps-vector-experiment)（`experimental_bvmap`、属性仕様は [attribute.pdf](https://maps.gsi.go.jp/help/pdf/vector/attribute.pdf)）— [国土地理院コンテンツ利用規約](https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html)
 - [JARTIC 交通規制情報](https://www.jartic.or.jp/service/opendata/)（拡張版標準フォーマット k_2.1）— JARTIC オープンデータ利用規約
 - 市域: [geoshape.ex.nii.ac.jp 行政区域データ](https://geoshape.ex.nii.ac.jp/city/)（川越）、[国土数値情報 行政区域 N03-20240101](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2024.html)（札幌、10 区を結合）
-- 道路統計（全国版）: [国土交通省 道路統計年報 2024 道路の現況 表15/19/22/25](https://www.mlit.go.jp/road/ir/ir-data/tokei-nen/2024/nenpo02.html)（`data/official/`）、県境: [国土数値情報 N03-20240101（全国）](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2024.html)
+- 道路統計（全国版）: [国土交通省 道路統計年報 2024 道路の現況 表15/19/22/25](https://www.mlit.go.jp/road/ir/ir-data/tokei-nen/2024/nenpo02.html)（`data/official/`）、県境・市区町村境界（ビューワの行政区域表示・市区町村別集計）: [国土数値情報 N03-20240101（全国）](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2024.html)
 - 道路統計: 川越市[「道路の概要」](https://www.city.kawagoe.saitama.jp/kurashi/kotsu/1003125/1003150.html)、札幌市[「札幌の交通・道路 2023」](https://www.city.sapporo.jp/sogokotsu/date/2023/documents/2023-01_road.pdf)
 - [札幌市認定路線網図](https://ckan.pf-sapporo.jp/dataset/sapporo_authorized_road)（CC BY 4.0、道路法の認定路線・幅員つき）
 - 背景地図: [国土地理院 最適化ベクトルタイル](https://github.com/gsi-cyberjapan/optimal_bvmap)（`optimal_bvmap-v1` PMTiles）。標準スタイル `std.json` を `scripts/make_pale_style.py` で淡色化した `docs/style/pale.json` で描画。スプライト・グリフは地理院のものを参照
