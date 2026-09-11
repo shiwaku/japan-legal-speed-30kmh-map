@@ -51,7 +51,7 @@ roads["authorized"] = roads.frac_auth >= 0.5
 total = roads.len_m.sum() / 1000
 by = roads.groupby(["rdCtg", "authorized"]).len_m.sum().unstack(fill_value=0) / 1000
 by.index = by.index.map({0: "国道", 1: "都道府県道", 2: "市区町村道", 3: "高速自動車国道等"})
-print("\nGSI 通常道路 km × 認定路線に乗るか:\n", by.round(1).to_string())
+print("\nGSI 車道 km × 認定路線に乗るか:\n", by.round(1).to_string())
 off = area.cfg["official_road_km"]
 gsi_muni = roads.loc[roads.rdCtg == 2, "len_m"].sum() / 1000
 print(f"\n市区町村道: GSI {gsi_muni:.0f} km / 道路統計 {off['市区町村道']:.0f} km / 差 {gsi_muni - off['市区町村道']:.0f} km"

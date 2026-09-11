@@ -91,8 +91,8 @@ for key, (cfg, m) in sorted(prefs.items(), key=lambda kv: kv[1][0]["pref_code"])
     ch = m["classes"].get(common.FINAL_CHANGED, 0)
     rows.append({
         "code": cfg["pref_code"], "都道府県": cfg["name"],
-        "地理院中心線 km": m["total_km"], "通常道路 km": normal, "60→30 変更 km": ch,
-        "変更/通常道路 %": round(ch / normal * 100, 1),
+        "地理院中心線 km": m["total_km"], "車道 km": normal, "60→30 変更 km": ch,
+        "変更/車道 %": round(ch / normal * 100, 1),
         "変更/道路法道路 %(下限〜上限)": f"{o.get('changed_share_pct', ['?', '?'])[0]}〜{o.get('changed_share_pct', ['?', '?'])[1]}",
         "対象道路 %(下限〜上限)": f"{o.get('structural_share_pct', ['?', '?'])[0]}〜{o.get('structural_share_pct', ['?', '?'])[1]}",
         "道路統計 5.5m未満 %": (cfg.get("official_width") or {}).get("share_lt_5_5m_pct"),
@@ -108,7 +108,7 @@ for r in df.itertuples(index=False):
 (outdir / "prefectures.md").write_text("\n".join(md) + "\n", encoding="utf-8")
 
 j = manifest["japan"]
-print(f"全国 {len(prefs)} 都道府県: 中心線 {total:,.0f} km / 通常道路 {gsi_normal:,.0f} km / 道路統計 {official_total:,.0f} km")
-print(f"  60→30 変更 {changed:,.0f} km = 通常道路の {changed / gsi_normal * 100:.1f}% / 道路法道路に換算 {j['official']['changed_share_pct'][0]}〜{j['official']['changed_share_pct'][1]}%")
+print(f"全国 {len(prefs)} 都道府県: 中心線 {total:,.0f} km / 車道 {gsi_normal:,.0f} km / 道路統計 {official_total:,.0f} km")
+print(f"  60→30 変更 {changed:,.0f} km = 車道の {changed / gsi_normal * 100:.1f}% / 道路法道路に換算 {j['official']['changed_share_pct'][0]}〜{j['official']['changed_share_pct'][1]}%")
 print(f"  構造的に対象(5.5m未満・分離帯なし) 道路法道路に換算 {j['official']['structural_share_pct'][0]}〜{j['official']['structural_share_pct'][1]}%  (道路統計年報の 5.5m 未満 = 71.0%)")
 print(f"  → {outdir / 'prefectures.csv'}, {manifest_path}")
