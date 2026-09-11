@@ -78,6 +78,9 @@ html, body {
   padding: 12px; display: flex; flex-direction: column; gap: 14px;
   overscroll-behavior: contain;
 }
+/* パネルは自前でスクロールするので中身を縦に潰さない。
+   overflow: hidden の行(.toggle)は自動最小サイズが 0 になり、潰れて文字が上下で切れる */
+.panel-body > * { flex: none; }
 .lead { margin: 0; font-size: 12px; line-height: 1.6; color: var(--ink-2); }
 .lead b { color: var(--ink); }
 
@@ -134,9 +137,11 @@ html, body {
 .toggle input:focus-visible ~ .sw { outline: 2px solid var(--accent); outline-offset: 2px; }
 .t-label { flex: 1; min-width: 0; font-size: 12.5px; font-weight: 600; }
 .t-km { flex: none; font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
-/* 色見本の無い単独オプション(行政区域など)は普通のチェックボックスで */
-.toggle.option { margin-top: 6px; padding: 4px 8px; }
-.toggle.option input[type='checkbox'] { position: static; opacity: 1; width: 14px; height: 14px; margin: 0; accent-color: var(--accent); pointer-events: auto; }
+/* 色見本の無い単独オプション(行政区域など)は普通のチェックボックスで。
+   ラベルは 2 行になることがあるので clip せず、行間を空ける */
+.toggle.option { margin-top: 6px; padding: 4px 8px; overflow: visible; align-items: flex-start; }
+.toggle.option .t-label { line-height: 1.45; }
+.toggle.option input[type='checkbox'] { position: static; flex: none; opacity: 1; width: 14px; height: 14px; margin: 1px 0 0; accent-color: var(--accent); pointer-events: auto; }
 .toggle.option .t-label { font-size: 12px; font-weight: 500; color: var(--ink-2); }
 .toggle.option input:not(:checked) ~ .t-label { text-decoration: none; color: var(--ink-3); }
 
