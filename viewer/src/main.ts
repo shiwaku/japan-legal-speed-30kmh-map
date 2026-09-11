@@ -3,7 +3,7 @@ import { Protocol } from "pmtiles";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import { BASEMAPS, getBasemapStyle, insertBeforeId, type Basemap } from "./basemap";
-import { CHANGED, CTG, MODES, MUNI_STEPS, WIDTH, defaultOff, label, orderedClasses, type AreaInfo, type Mode, type MuniInfo } from "./classes";
+import { CHANGED, CTG, MODES, MUNI_STEPS, WIDTH, defaultOff, label, legendRows, type AreaInfo, type Mode, type MuniInfo } from "./classes";
 import { applyThemeAttr, initialTheme, type Theme } from "./theme";
 import "./style.css";
 
@@ -389,22 +389,34 @@ function renderLegend(): void {
   const tally = scopeTally();
   ensureDefaults(mode, Object.keys(tally));
   legendDiv.innerHTML = "";
-  for (const s of orderedClasses(mode, tally)) {
+  // 凡例は区分をまとめた行(標識 60 km/h 以上など)。ON/OFF は行に含まれる区分すべてに効く
+  let section: string | undefined;
+  for (const g of legendRows(mode, tally)) {
+    if (g.section && g.section !== section) {
+      section = g.section;
+      const head = document.createElement("div");
+      head.className = "legend-sec";
+      head.textContent = section;
+      legendDiv.append(head);
+    }
     const row = document.createElement("label");
     row.className = "toggle";
     const input = document.createElement("input");
     input.type = "checkbox";
-    input.checked = !off[mode].has(s.value);
-    input.addEventListener("change", () => { input.checked ? off[mode].delete(s.value) : off[mode].add(s.value); applyStyle(); });
+    input.checked = g.values.some((v) => !off[mode].has(v));
+    input.addEventListener("change", () => {
+      for (const v of g.values) input.checked ? off[mode].delete(v) : off[mode].add(v);
+      applyStyle();
+    });
     const sw = document.createElement("span");
     sw.className = "sw";
-    sw.style.background = s.color;
+    sw.style.background = g.color;
     const text = document.createElement("span");
     text.className = "t-label";
-    text.textContent = label(mode, s.value);
+    text.textContent = g.label;
     const val = document.createElement("span");
     val.className = "t-km";
-    val.textContent = km(tally[s.value]);
+    val.textContent = km(g.km);
     row.append(input, sw, text, val);
     legendDiv.append(row);
   }
@@ -416,7 +428,8 @@ function renderLegend(): void {
   if (!m && a.official) s += `。道路法上の道路に換算すると ${a.official.changed_share_pct[0]}〜${a.official.changed_share_pct[1]}%`;
   if (m) {
     const r = muniRank.get(muni!);
-    if (r) s += `。変更率は全国 ${rankTotal.toLocaleString()} 市区町村中 <b>${r.toLocaleString()} 位</b>`;
+    // 政令市を区に分けて数えた地区数(市区町村数 1,741 とは違う)
+    if (r) s += `。変更率は全国 ${rankTotal.toLocaleString()} 地区（政令市は区単位）中 <b>${r.toLocaleString()} 位</b>`;
     s += `。市区町村への割り当ては線分の中点で行い、道路法換算は都道府県のみ`;
   }
   s += `<span class="stat-meta">規制データ JARTIC ${a.jartic_month.slice(0, 4)}-${a.jartic_month.slice(4)} / 生成 ${a.generated}</span>`;

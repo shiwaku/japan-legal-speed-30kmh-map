@@ -1,6 +1,8 @@
 // 判定区分・速度の表示順と色。scripts/common.py の FINAL_STYLE / SPEED_STYLE と同じ。
 // タイルの属性値(データ上の区分名)は変えず、表示ラベルだけ DISPLAY で置き換える。
 // 表にない区分名が来ても凡例に出す(orderedClasses)。区分名は言い換えられることがあるため。
+// 凡例は legendRows() でまとめる: 60 km/h 以上の標識のように「変わらない」ことだけが分かれば十分な
+// 区分は 1 行にする(細かい内訳はクリックしたときのポップアップで出る)。
 
 export type Mode = "final" | "speed_before" | "speed_after";
 
@@ -10,24 +12,25 @@ export interface ClassStyle {
   on: boolean;
 }
 
+// 同じ凡例行にまとめる区分は同じ色にしてある(凡例の色見本と地図の線の色を一致させる)
 export const FINAL_STYLE: ClassStyle[] = [
   { value: "★60→30 変更(推定)", color: "#d62728", on: true },
   { value: "不明:幅員5.5m以上(中央線有無不明)", color: "#ff9f1c", on: true },
+  { value: "規制あり:標識0", color: "#deebf7", on: true },
   { value: "規制あり:標識20", color: "#deebf7", on: true },
   { value: "規制あり:標識30", color: "#9ecae1", on: true },
   { value: "規制あり:標識40", color: "#4292c6", on: true },
   { value: "規制あり:標識50", color: "#2171b5", on: true },
-  { value: "規制あり:標識60", color: "#08519c", on: true },
+  { value: "規制あり:標識60", color: "#08306b", on: true },
   { value: "規制あり:標識70", color: "#08306b", on: true },
   { value: "規制あり:標識80", color: "#08306b", on: true },
-  { value: "規制あり:標識90", color: "#041f45", on: true },
-  { value: "規制あり:標識100", color: "#041f45", on: true },
-  { value: "規制あり:標識120", color: "#041f45", on: true },
-  { value: "規制あり:標識0", color: "#bcbddc", on: true },
+  { value: "規制あり:標識90", color: "#08306b", on: true },
+  { value: "規制あり:標識100", color: "#08306b", on: true },
+  { value: "規制あり:標識120", color: "#08306b", on: true },
+  { value: "規制あり:ゾーン0", color: "#c7e9c0", on: true },
   { value: "規制あり:ゾーン20", color: "#c7e9c0", on: true },
   { value: "規制あり:ゾーン30", color: "#74c476", on: true },
   { value: "規制あり:ゾーン40", color: "#238b45", on: true },
-  { value: "規制あり:ゾーン0", color: "#d9f0d3", on: true },
   { value: "対象外:車両通行帯あり", color: "#756bb1", on: true },
   { value: "対象外:中央線(JARTIC)", color: "#54278f", on: true },
   { value: "対象外:分離帯あり", color: "#636363", on: true },
@@ -39,17 +42,17 @@ export const FINAL_STYLE: ClassStyle[] = [
 ];
 
 export const SPEED_STYLE: ClassStyle[] = [
+  { value: "0", color: "#7f0000", on: true },
   { value: "20", color: "#7f0000", on: true },
   { value: "30", color: "#d62728", on: true },
   { value: "40", color: "#ff7f0e", on: true },
   { value: "50", color: "#2ca02c", on: true },
   { value: "60", color: "#1f77b4", on: true },
-  { value: "70", color: "#08519c", on: true },
+  { value: "70", color: "#08306b", on: true },
   { value: "80", color: "#08306b", on: true },
-  { value: "90", color: "#041f45", on: true },
-  { value: "100", color: "#041f45", on: true },
-  { value: "120", color: "#041f45", on: true },
-  { value: "0", color: "#bcbddc", on: true },
+  { value: "90", color: "#08306b", on: true },
+  { value: "100", color: "#08306b", on: true },
+  { value: "120", color: "#08306b", on: true },
   { value: "不明(60/30)", color: "#ff9f1c", on: true },
   { value: "高速", color: "#000000", on: true },
   { value: "対象外", color: "#bdbdbd", on: false },
@@ -98,6 +101,10 @@ export function defaultOff(mode: Mode, value: string): boolean {
   return mode === "final" ? value.endsWith("(ftCode)") : value === "対象外";
 }
 
+function colorOf(mode: Mode, value: string): string {
+  return MODES.find((m) => m.key === mode)!.style.find((s) => s.value === value)?.color ?? FALLBACK_COLOR;
+}
+
 /**
  * 凡例に出す区分。既知のものは表の順、表にないものは延長の大きい順で後ろに足す。
  * tally はエリアの classes / speed_before / speed_after。
@@ -110,6 +117,76 @@ export function orderedClasses(mode: Mode, tally: Record<string, number>): Class
     .sort((a, b) => tally[b] - tally[a])
     .map((value) => ({ value, color: FALLBACK_COLOR, on: !defaultOff(mode, value) }));
   return [...known, ...rest];
+}
+
+/** 凡例の節。判定モードだけ使う(速度モードは全部 km/h なので分けない)。 */
+export const SECTIONS = { changed: "60→30", same: "変わらない（規制あり）", out: "対象外", other: "その他" } as const;
+
+/**
+ * この区分をどの凡例行・どの節に入れるか。
+ * 引き下げと関係のない区分(標識 60 km/h 以上など)は 1 行にまとめ、節見出しに任せてラベルを短くする。
+ */
+function groupOf(mode: Mode, value: string): { key: string; label: string; section?: string } {
+  if (mode === "final") {
+    const sign = /^規制あり:標識(\d+)$/.exec(value);
+    if (sign) {
+      const v = Number(sign[1]);
+      // 60 以上は幅の広い道で、そもそも引き下げの対象外。20 以下はデータ上の 0 km/h を含む
+      if (v >= 60) return { key: "sign-60up", label: "標識 60 km/h 以上", section: SECTIONS.same };
+      if (v <= 20) return { key: "sign-le20", label: "標識 20 km/h 以下", section: SECTIONS.same };
+      return { key: `sign-${v}`, label: `標識 ${v} km/h`, section: SECTIONS.same };
+    }
+    const zone = /^規制あり:ゾーン(\d+)$/.exec(value);
+    if (zone) {
+      const v = Number(zone[1]);
+      if (v < 30) return { key: "zone-le20", label: "ゾーン20 以下", section: SECTIONS.same };
+      return { key: `zone-${v}`, label: `ゾーン${v}`, section: SECTIONS.same };
+    }
+    if (value.startsWith("対象外")) {
+      return { key: value, label: (DISPLAY[value] ?? value).replace(/^対象外: ?/, ""), section: SECTIONS.out };
+    }
+    if (value === CHANGED || value.startsWith("不明:幅員")) {
+      return { key: value, label: label(mode, value), section: SECTIONS.changed };
+    }
+    return { key: value, label: label(mode, value), section: SECTIONS.other };
+  }
+  if (/^\d+$/.test(value)) {
+    const v = Number(value);
+    if (v >= 70) return { key: "sp-70up", label: "70 km/h 以上" };
+    if (v <= 20) return { key: "sp-le20", label: "20 km/h 以下" };
+    return { key: `sp-${v}`, label: `${v} km/h` };
+  }
+  return { key: value, label: label(mode, value) };
+}
+
+export interface LegendRow {
+  key: string;
+  label: string;
+  /** 節見出し。前の行と同じなら見出しは出さない(判定モードのみ) */
+  section?: string;
+  color: string;
+  /** この行に含まれるデータ上の区分名(表示 ON/OFF はまとめて効く) */
+  values: string[];
+  km: number;
+}
+
+/** 凡例の行。まとめた区分は延長を合計し、色は先頭の区分の色(まとめる区分は同色にしてある)。 */
+export function legendRows(mode: Mode, tally: Record<string, number>): LegendRow[] {
+  const rows: LegendRow[] = [];
+  const index = new Map<string, LegendRow>();
+  for (const s of orderedClasses(mode, tally)) {
+    const g = groupOf(mode, s.value);
+    const hit = index.get(g.key);
+    if (hit) {
+      hit.values.push(s.value);
+      hit.km += tally[s.value] ?? 0;
+      continue;
+    }
+    const row: LegendRow = { key: g.key, label: g.label, section: g.section, color: colorOf(mode, s.value), values: [s.value], km: tally[s.value] ?? 0 };
+    index.set(g.key, row);
+    rows.push(row);
+  }
+  return rows;
 }
 
 /** 市区町村の面塗り(変更率 %)。step 式の区切りと色。実データの分布(中央値 79%、10% 分位 62%、90% 分位 87%)に合わせた。 */
