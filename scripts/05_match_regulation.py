@@ -117,7 +117,7 @@ if official:
     cmp["GSI中心線 km"] = gsi_km.reindex(cmp.index)
     cmp["道路統計 実延長 km"] = pd.Series({k: v for k, v in official.items() if k in order}).reindex(cmp.index)
     cmp["差 km"] = cmp["GSI中心線 km"] - cmp["道路統計 実延長 km"]
-    print("\n## 地理院中心線(通常道路) と 道路統計 実延長 の比較\n", cmp.round(1).to_string())
+    print("\n## 地理院中心線(車道(軽車道・徒歩道等を除く)) と 道路統計 実延長 の比較\n", cmp.round(1).to_string())
     excess = max(0.0, float(cmp.loc["市区町村道", "差 km"])) if "市区町村道" in cmp.index and pd.notna(cmp.loc["市区町村道", "差 km"]) else 0.0
     other = float(gsi_km.get("その他", 0.0))  # rdCtg=5 は明示的に道路法適用外
     nonlaw = excess + other
@@ -134,7 +134,7 @@ if official:
         "structural_share_pct": rng(a_km),
         "changed_share_pct": rng(b_km),
     }
-    print(f"市区町村道の超過 {excess:.0f} km + rdCtg=その他 {other:.0f} km を道路法適用外とみなすと、通常道路 {total:.0f} km に対する割合は"
+    print(f"市区町村道の超過 {excess:.0f} km + rdCtg=その他 {other:.0f} km を道路法適用外とみなすと、車道(軽車道・徒歩道等を除く) {total:.0f} km に対する割合は"
           f" 構造的に対象 {rng(a_km)[0]}〜{rng(a_km)[1]}% / 60→30 変更 {rng(b_km)[0]}〜{rng(b_km)[1]}%")
 
 if not args.save:

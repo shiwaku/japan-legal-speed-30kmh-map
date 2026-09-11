@@ -111,6 +111,7 @@ A. 川越市と札幌市では、判定の元になる幅の分布が国の道�
 
 ## 8. もっと詳しく
 
+- 言葉の意味: [用語集](glossary.md)
 - 判定の手順とコード: [README](../README.md)
 - 「7 割」の分母と分子の整理（川越市）: [notes/2026-09-10_kawagoe_7wari.md](../notes/2026-09-10_kawagoe_7wari.md)
 - 全国版の作り方と都道府県別の数字: [notes/2026-09-11_national.md](../notes/2026-09-11_national.md)

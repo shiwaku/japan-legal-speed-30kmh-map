@@ -78,7 +78,7 @@ CLS_WIDE_UNKNOWN = "不明:幅員5.5m以上(中央線有無不明)"
 CLS_ATTR_UNKNOWN = "不明:属性不明"
 CLS_MEDIAN = "対象外:分離帯あり"
 CLS_MOTORWAY = "対象外:高速等"
-CLS_MINOR = "非通常道路(ftCode)"
+CLS_MINOR = "非車道(軽車道・徒歩道等を除く)(ftCode)"
 
 FINAL_CHANGED = "★60→30 変更(推定)"
 FINAL_LANE = "対象外:車両通行帯あり"

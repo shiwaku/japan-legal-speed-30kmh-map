@@ -54,7 +54,7 @@ def suspect(r):
     return False
 roads["non_road_law"] = [suspect(r) for r in roads.itertuples()]
 pd.set_option("display.width", 200)
-print("\nGSI 通常道路 km × OSM highway:\n", (roads.groupby("highway").len_m.sum() / 1000).round(1).sort_values(ascending=False).to_string())
+print("\nGSI 車道 km × OSM highway:\n", (roads.groupby("highway").len_m.sum() / 1000).round(1).sort_values(ascending=False).to_string())
 print("\n適用外の疑い(service/track/path/access=private): %.0f km  ← 道路統計との差 %s km" % (roads.loc[roads.non_road_law, "len_m"].sum() / 1000, area.cfg.get("official_road_km", {}).get("市区町村道") and round(roads.loc[roads.rdCtg == 2, "len_m"].sum() / 1000 - area.cfg["official_road_km"]["市区町村道"], 0)))
 print("(unmatched) km: %.0f  / うち幅員3m未満: %.0f" % (roads.loc[roads.highway == "(unmatched)", "len_m"].sum() / 1000, roads.loc[(roads.highway == "(unmatched)") & (roads.rnkWidth == 0), "len_m"].sum() / 1000))
 print("\n判定クラス × 適用外の疑い km:\n", (roads.pivot_table(index="final", columns="non_road_law", values="len_m", aggfunc="sum", fill_value=0) / 1000).round(1).to_string())
