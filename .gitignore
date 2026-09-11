@@ -15,10 +15,19 @@ data/areas/*/osm_highways.geojson
 # - data/areas/*/authorized_road/: 自治体の認定路線網図(shapefile)。areas/<key>.json の authorized_road.source から取る
 data/areas/*/authorized_road/
 
-# 中間生成物。集計表と判定図だけ残す
+# - data/n03/: 国土数値情報 N03 全国 zip(600MB)
+# - data/areas/pref_*/boundary.geojson: N03 から make_pref_areas.py で再生成できる(47 県で 350MB)
+data/n03/
+data/areas/pref_*/boundary.geojson
+
+# 中間生成物。集計表と判定図だけ残す(都道府県の判定図 47 枚 47MB は残さない)
 out/*/*
 !out/*/summary_*.csv
 !out/*/final.png
+out/pref_*/final.png
+!out/national/prefectures.csv
+!out/national/prefectures.md
+out/*.log
 
 # macOS
 .DS_Store

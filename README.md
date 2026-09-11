@@ -6,6 +6,8 @@
 
 > **推定であって、確定ではありません。** 中央線そのもののオープンデータは実質存在しないため、幅員 5.5 m 未満を「中央線なし」の代替指標にしています。幅員 5.5 m 以上の道路は中央線の有無を判定できず「不明」と表示します。標識の現地確認に代わるものではありません。
 
+道路に詳しくない人向けに、法改正の中身・使ったデータ・推定の考え方・数字の読み方をまとめた **[この地図の前提と限界](docs/premise.md)** を用意しています。
+
 ## 地図
 
 **https://shiwaku.github.io/japan-legal-speed-30kmh-map/**
@@ -65,6 +67,45 @@
 道路交通法の法定速度は私道（一般交通の用に供する場所）にも及ぶので、地図からは除いていません。
 
 分母・分子の整理と OSM で私道・農道を切り分ける実験の記録: [notes/2026-09-10_kawagoe_7wari.md](notes/2026-09-10_kawagoe_7wari.md)
+
+## 全国版（47 都道府県）
+
+同じ判定を全国に広げた（[notes/2026-09-11_national.md](notes/2026-09-11_national.md)）。単位は都道府県、分母補正は[道路統計年報 2024](https://www.mlit.go.jp/road/ir/ir-data/tokei-nen/2024/nenpo02.html) の都道府県別実延長。
+
+| | km |
+|---|---|
+| 地理院の道路中心線（47 県合計） | 2,297,024 |
+| うち通常道路（ftCode 2701–2704） | 1,969,106 |
+| 道路統計年報の実延長（道路法上の道路） | 1,136,668 |
+| **60→30 に変わった（推定）** | **1,534,635** |
+
+| 割合 | 値 |
+|---|---|
+| 60→30 変更 / 地理院の通常道路 | 77.9% |
+| 60→30 変更 / 道路法上の道路に換算（下限〜上限） | **62.5〜77.9%** |
+| 構造的に対象（幅員 5.5 m 未満・分離帯なし）/ 道路法道路に換算 | 71.8〜83.4% |
+| （参考）道路統計年報 表15 の幅員 5.5 m 未満 | 71.0% |
+
+報道の「約 7 割が対象」は道路統計年報の幅員 5.5 m 未満（71.0%）と一致し、このリポジトリの「構造的に対象」（道路法道路に換算 72〜83%）とも整合する。実際に速度が変わったのは、そこから既存の標識・ゾーン規制を除いた 6〜8 割。都道府県別は [out/national/prefectures.md](out/national/prefectures.md)。兵庫県は 40 km/h の区域規制が県の 27% を覆い、変更は 48% と全国最低。
+
+全国 PMTiles（Z12–16、間引きなし）は GitHub に置けないサイズなので R2 で配信し、ビューワは `docs/areas.json` の `tiles` に書いた URL を読む。Z9 から作ると東京圏の z9 タイルが 197 万本・38MB になってブラウザが開けないため、全国版は Z12 から（市区町村版は Z9 から）。
+
+### 全国版の作り方
+
+```bash
+# 地理院ベクトルタイル提供実験 ZL16 を全国分(216 万タイル 17GB)取得。WSL の ext4 に置く。8 並列で約 6 時間
+uv run python scripts/make_tile_download_list.py     # mokuroku から未取得分を列挙(再開時も同じ)
+wsl bash scripts/download_tiles_all.sh                # aria2c
+# 道路統計年報 2024 表15/19/22/25 (data/official/d_genkyou*.xlsx) → 都道府県別 official_road_km
+uv run python scripts/make_pref_official.py
+# 47 都道府県を順に 03'(GDAL でタイルディレクトリから抽出) → 04 → 05。約 5 時間。areas/pref_XX.json と県境は自動生成(N03 全国 zip が data/n03/ に要る)
+uv run python scripts/run_prefectures.py
+# 全国 PMTiles(WSL の tippecanoe、数時間) と 全国集計
+wsl bash scripts/06_build_national_pmtiles.sh         # → ~/gsi/japan-legal-speed-30kmh.pmtiles
+uv run python scripts/make_national_summary.py --tiles https://<配信先>/japan-legal-speed-30kmh.pmtiles
+```
+
+`03_extract_roads_gdal.py` は 01〜03 の代替で、WSL の GDAL（MVT ドライバ）でタイルディレクトリを直接読む（川越で 60 秒 → 3 秒、結果は同一）。市区町村にも `--assign clip` で使える。
 
 ## 使い方
 
@@ -149,6 +190,7 @@ docs/                       GitHub Pages: index.html, areas.json, tiles/<key>.pm
 - 国土地理院 [ベクトルタイル提供実験](https://github.com/gsi-cyberjapan/gsimaps-vector-experiment)（`experimental_bvmap`、属性仕様は [attribute.pdf](https://maps.gsi.go.jp/help/pdf/vector/attribute.pdf)）— [国土地理院コンテンツ利用規約](https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html)
 - [JARTIC 交通規制情報](https://www.jartic.or.jp/service/opendata/)（拡張版標準フォーマット k_2.1）— JARTIC オープンデータ利用規約
 - 市域: [geoshape.ex.nii.ac.jp 行政区域データ](https://geoshape.ex.nii.ac.jp/city/)（川越）、[国土数値情報 行政区域 N03-20240101](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2024.html)（札幌、10 区を結合）
+- 道路統計（全国版）: [国土交通省 道路統計年報 2024 道路の現況 表15/19/22/25](https://www.mlit.go.jp/road/ir/ir-data/tokei-nen/2024/nenpo02.html)（`data/official/`）、県境: [国土数値情報 N03-20240101（全国）](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2024.html)
 - 道路統計: 川越市[「道路の概要」](https://www.city.kawagoe.saitama.jp/kurashi/kotsu/1003125/1003150.html)、札幌市[「札幌の交通・道路 2023」](https://www.city.sapporo.jp/sogokotsu/date/2023/documents/2023-01_road.pdf)
 - [札幌市認定路線網図](https://ckan.pf-sapporo.jp/dataset/sapporo_authorized_road)（CC BY 4.0、道路法の認定路線・幅員つき）
 - 背景地図: [国土地理院 最適化ベクトルタイル](https://github.com/gsi-cyberjapan/optimal_bvmap)（`optimal_bvmap-v1` PMTiles）。標準スタイル `std.json` を `scripts/make_pale_style.py` で淡色化した `docs/style/pale.json` で描画。スプライト・グリフは地理院のものを参照
