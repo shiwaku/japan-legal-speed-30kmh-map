@@ -2,8 +2,8 @@
 # 6'. 全国版: out/pref_XX/final.fgb(47 都道府県) を 1 本の PMTiles にする。
 #     Z12–16 を全線分・全属性で作る(間引き・まとめはしない)。
 #     Z9 から作ると東京圏の z9 タイルが 197 万本・gzip 38MB(1 画面で 100MB 超)になりブラウザが開けないので、
-#     全国版は Z12 から。市区町村版(docs/tiles/*.pmtiles)は Z9 から。
-#     出来上がりは 5GB 超になる見込みなので docs/ には置かず ~/gsi/ に出し、R2 などへ上げる。
+#     全国版は Z12 から。市区町村版(viewer/public/tiles/*.pmtiles)は Z9 から。
+#     出来上がりは 5GB 超になる見込みなので viewer/public/ には置かず ~/gsi/ に出し、R2 などへ上げる。
 #
 #   wsl bash scripts/06_build_national_pmtiles.sh            # ~/gsi/japan-legal-speed-30kmh.pmtiles
 #   wsl bash scripts/06_build_national_pmtiles.sh /path/out.pmtiles

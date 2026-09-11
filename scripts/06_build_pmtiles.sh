@@ -1,5 +1,5 @@
 #!/bin/bash
-# 6. out/<area>/final.geojson → docs/tiles/<area>.pmtiles
+# 6. out/<area>/final.geojson → viewer/public/tiles/<area>.pmtiles
 #    Z9–16 を全線分・全属性で作る。低ズームでの間引き・まとめはしない(歯抜けになる)。
 #    低ズームのタイルは大きくなる(札幌 z10 で数 MB)が、そのまま出す。
 #
@@ -11,7 +11,7 @@ set -euo pipefail
 AREA="${1:?usage: 06_build_pmtiles.sh <area>}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SRC="$ROOT/out/$AREA/final.geojson"
-DST="$ROOT/docs/tiles/$AREA.pmtiles"
+DST="$ROOT/viewer/public/tiles/$AREA.pmtiles"
 [ -f "$SRC" ] || { echo "$SRC が無い。05_match_regulation.py --save を先に" >&2; exit 1; }
 
 # /mnt/c (drvfs) 上での tippecanoe は遅いので、WSL では ext4 側の一時ディレクトリで作る

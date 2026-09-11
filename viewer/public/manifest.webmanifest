@@ -1,0 +1,16 @@
+{
+  "name": "この道、60→30？ 生活道路 30 km/h マップ",
+  "short_name": "この道、60→30？",
+  "description": "2026-09-01 施行の生活道路 30 km/h で法定速度が 60→30 に変わった道路(推定)を表示する地図",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#d62728",
+  "lang": "ja",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

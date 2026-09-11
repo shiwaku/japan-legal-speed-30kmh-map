@@ -1,6 +1,6 @@
 """国土地理院 最適化ベクトルタイルの標準スタイル(std.json)から、淡色地図風のスタイルを作る。
 
-    uv run python scripts/make_pale_style.py   # → docs/style/pale.json
+    uv run python scripts/make_pale_style.py   # → viewer/public/pale.json
 
 判定結果の線を主役にしたいので、背景地図は色を抜いて薄くする。std.json を取得し、
 paint の色を「白に寄せて彩度を落とす」変換にかける。式(match/case/interpolate)の中の
@@ -16,7 +16,8 @@ import requests
 import common
 
 SRC = "https://gsi-cyberjapan.github.io/optimal_bvmap/style/std.json"
-DST = common.DOCS / "style" / "pale.json"
+DST = common.DOCS / "pale.json"
+DST_STD = common.DOCS / "std.json"  # 標準地図風も同じ XYZ 参照に直して置く(ビューワの背景切替用)
 
 HEX = re.compile(r"^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$")
 RGBA = re.compile(r"^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)$")
@@ -61,6 +62,7 @@ def walk(x, fn):
 
 def main():
     style = requests.get(SRC, timeout=60).json()
+    std = json.loads(json.dumps(style))
     for layer in style["layers"]:
         lid = layer["id"]
         paint = layer.setdefault("paint", {})
@@ -95,7 +97,15 @@ def main():
     style.setdefault("metadata", {})["derived_from"] = SRC
     DST.parent.mkdir(parents=True, exist_ok=True)
     DST.write_text(json.dumps(style, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
-    print(f"{len(style['layers'])} layers → {DST} ({DST.stat().st_size / 1024:.0f} KB)")
+    # 標準地図風(std)も、色は変えずタイル参照だけ XYZ に直して置く(ビューワの背景切替「標準」用)
+    for src in std["sources"].values():
+        if src.get("type") == "vector":
+            src["tiles"] = ["https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/{z}/{x}/{y}.pbf"]
+            src.pop("url", None)
+            src["attribution"] = '<a href="https://github.com/gsi-cyberjapan/optimal_bvmap" target="_blank">国土地理院 最適化ベクトルタイル</a>'
+    std.setdefault("metadata", {})["derived_from"] = SRC
+    DST_STD.write_text(json.dumps(std, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+    print(f"{len(style['layers'])} layers → {DST} ({DST.stat().st_size / 1024:.0f} KB), {DST_STD} ({DST_STD.stat().st_size / 1024:.0f} KB)")
 
 
 if __name__ == "__main__":

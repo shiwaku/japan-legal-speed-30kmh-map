@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 AREAS = ROOT / "areas"
 DATA = ROOT / "data"
 OUT = ROOT / "out"
-DOCS = ROOT / "docs"
+DOCS = ROOT / "viewer" / "public"  # ビューワ(Vite)の静的ファイル置き場。areas.json, tiles/, pale.json
 
 GSI_TILE_URL = "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/{z}/{x}/{y}.pbf"
 GSI_MOKUROKU_URL = "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/mokuroku.csv.gz"
@@ -84,7 +84,7 @@ FINAL_CHANGED = "★60→30 変更(推定)"
 FINAL_LANE = "対象外:車両通行帯あり"
 FINAL_CENTERLINE = "対象外:中央線(JARTIC)"
 
-# 表示順と色。ビューワ(docs/index.html)と図(05)が共有する。
+# 表示順と色。ビューワ(viewer/src/classes.ts)と図(05)が共有する。
 FINAL_STYLE = [
     (FINAL_CHANGED, "#d62728"),
     (CLS_WIDE_UNKNOWN, "#ff9f1c"),
@@ -160,7 +160,7 @@ SPEED_UNKNOWN = "不明(60/30)"
 SPEED_EXPRESSWAY = "高速"
 SPEED_NA = "対象外"
 
-# 改正前後の速度の表示順と色。ビューワ(docs/index.html)の SPEED_STYLE と同じ
+# 改正前後の速度の表示順と色。ビューワ(viewer/src/classes.ts)の SPEED_STYLE と同じ
 SPEED_STYLE = [
     ("20", "#7f0000"),
     ("30", "#d62728"),

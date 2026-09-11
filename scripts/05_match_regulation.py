@@ -22,7 +22,7 @@ p = common.parser(__doc__)
 p.add_argument("--buffer", type=float, default=10.0, help="規制線のバッファ幅 m")
 p.add_argument("--th-line", type=float, default=0.7, help="線規制と見なす重なり率")
 p.add_argument("--th-poly", type=float, default=0.5, help="面規制(ゾーン30)と見なす内包率")
-p.add_argument("--save", action="store_true", help="out/<area>/final.* と docs/areas.json を書く")
+p.add_argument("--save", action="store_true", help="out/<area>/final.* と viewer/public/areas.json を書く")
 args = p.parse_args()
 area = common.Area(args.area)
 
