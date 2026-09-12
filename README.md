@@ -12,7 +12,7 @@
 
 **https://shiwaku.github.io/japan-legal-speed-30kmh-map/**
 
-`viewer/`（Vite + TypeScript + MapLibre GL JS + PMTiles。[dm-converter/viewer](https://github.com/shiwaku/dm-converter/tree/main/viewer) と同じ構成）。エリアをプルダウンで切り替え、**「判定 / 改正前の速度 / 改正後の速度」**をタブ（または <kbd>B</kbd> キー）で切り替えられます。改正前は標識の無い一般道が一様に 60 km/h（青）で、改正後にその大半が 30 km/h（赤）に変わるのが見えます。凡例のチェックで表示クラスを絞り、道路をクリックすると判定根拠（改正前後の速度・幅員区分・規制の重なり率）が出ます。
+`viewer/`（Vite + TypeScript + MapLibre GL JS + PMTiles。[dm-converter/viewer](https://github.com/shiwaku/dm-converter/tree/main/viewer) と同じ構成）。エリアをプルダウンで切り替え、**「判定 / 改正前の速度 / 改正後の速度」**をタブ（または <kbd>B</kbd> キー）で切り替えられます。改正前は標識の無い一般道が一様に 60 km/h（青）で、改正後にその大半が 30 km/h（赤）に変わるのが見えます。凡例のチェックで表示クラスを絞り、道路をクリックすると判定根拠（改正前後の速度・幅員区分・規制の重なり率。重なり率は市区町村タイルのみ）が出ます。
 
 ![川越市の判定図](out/kawagoe/final.png)
 
@@ -96,7 +96,7 @@
 
 報道の「約 7 割が対象」は道路統計年報の幅員 5.5 m 未満（70.8%）と一致し、このリポジトリの「構造的に対象」（道路法道路に換算 74〜83%）とも整合する。実際に速度が変わったのは、そこから既存の標識・ゾーン規制を除いた 6〜8 割。都道府県別は [out/national/prefectures.md](out/national/prefectures.md)。兵庫県は 40 km/h の区域規制が県面積の 27% を覆い、変更は 48% と全国最低。
 
-全国 PMTiles（Z12–16、間引きなし）は GitHub に置けないサイズなので R2 で配信し、ビューワは `docs/areas.json` の `tiles` に書いた URL を読む。Z9 から作ると東京圏の z9 タイルが 197 万本・38MB になってブラウザが開けないため、全国版は Z12 から（市区町村版は Z9 から）。
+全国 PMTiles（Z12–16、間引きなし）は GitHub に置けないサイズなので R2 で配信し、ビューワは `viewer/public/areas.json` の `tiles` に書いた URL を読む。Z9 から作ると東京圏の z9 タイルが 197 万本・38MB になってブラウザが開けないため、全国版は Z12 から（市区町村版は Z9 から）。
 
 ### 全国版の作り方
 
@@ -129,7 +129,7 @@ uv run python scripts/02_fetch_tiles.py      --area kawagoe
 uv run python scripts/03_decode_roads.py     --area kawagoe
 # 4. JARTIC 規制を市域で切り出し  (入力は下記の GeoJSONL)
 uv run python scripts/04_extract_jartic.py   --area kawagoe --jartic data/jartic/202607
-# 5. 重なり率で突合して最終判定。--save で out/<area>/final.* と docs/areas.json を書く
+# 5. 重なり率で突合して最終判定。--save で out/<area>/final.* と viewer/public/areas.json を書く
 uv run python scripts/05_match_regulation.py --area kawagoe --buffer 10 --save
 # 6. PMTiles  (tippecanoe。Windows は WSL2 で)
 wsl bash scripts/06_build_pmtiles.sh kawagoe
@@ -158,7 +158,7 @@ main に `viewer/**` の変更が入ると `.github/workflows/deploy-viewer.yml`
 | 表示 | 判定 / 改正前の速度 / 改正後の速度（<kbd>B</kbd> で前後トグル） |
 | 凡例 | 区分ごとに表示 ON/OFF、延長 km を併記。全ON/全OFF。「標識 60 km/h 以上」のように引き下げと関係のない区分は 1 行にまとめる（細かい区分はクリックしたときのポップアップで出る） |
 | 背景 | 淡色 / 標準（地理院 最適化ベクトルタイル）/ 写真（地理院 全国最新写真）/ 白図 |
-| テーマ | ライト / ダーク。初回は OS 設定、以降は localStorage |
+| テーマ | ライト / ダーク。既定はダーク（判定の色が地図の上で見分けやすい）。切り替えると localStorage に残る |
 | スマホ | 640px 以下はボトムシート。初期は畳んで地図を広く。保持タイル数と描画解像度を絞って WebGL コンテキスト消失を防ぐ |
 | PWA | manifest + アイコン。Service Worker は index.html だけネットワーク優先（Pages の 10 分キャッシュ対策）、タイルには介入しない |
 
@@ -177,7 +177,7 @@ python3 src/parse_regulation.py --zip-dir work/zip --out work
 
 1. `areas/<key>.json` を作る（`areas/kawagoe.json` を写す）。`epsg` は長さを測る平面直角座標系（例: 札幌 = XII 系 6680）、`boundary_url` は市域 GeoJSON の URL（無ければ `data/areas/<key>/boundary.geojson` を直接置く。政令市は geoshape に市全体が無いので国土数値情報 N03 の区を結合する）
 2. **`official_road_km` に道路統計の実延長（国道・都道府県道・市区町村道、出典 URL、基準日）を必ず書く。** 市の「道路の概要」「道路現況」「統計書」にある。無いと `05` は止まる（`tests/test_areas.py` でも検査）。地理院中心線は私道・農道を含むので、これが無いと全国統計と比べられない
-3. 上の 1〜6 を `--area <key>` で回す。`docs/areas.json` にエリアが追記され、ビューワのプルダウンに出る
+3. 上の 1〜6 を `--area <key>` で回す。`viewer/public/areas.json` にエリアが追記され、ビューワのプルダウンに出る
 
 ## ディレクトリ構成
 
@@ -196,7 +196,7 @@ data/
   areas/<key>/              boundary.geojson, tiles_z16.csv（コミット）, jartic_*.geojson（04 の出力、ignore）
   gsi/                      mokuroku.csv.gz, tiles/<key>/*.pbf（ignore）
   jartic/<yyyymm>/          converter の GeoJSONL（ignore）
-out/<key>/                  roads_z16.parquet, roads_city.geojson, final.{parquet,geojson}（ignore）
+out/<key>/                  roads_z16.parquet, roads_city.{parquet,geojson}, final.{parquet,geojson}（ignore）
                             summary_*.csv, final.png（コミット）
 viewer/                     ビューワ（Vite + TS）。public/ に areas.json, municipalities.json, tiles/<key>.pmtiles, tiles/municipalities.pmtiles, pale.json, std.json
 docs/                       premise.md（前提と限界）, glossary.md（用語集）
@@ -212,7 +212,7 @@ docs/                       premise.md（前提と限界）, glossary.md（用�
 - road レイヤーには **ftCode 2201（道路縁）が混在**する（件数の約 3 割）。27xx で絞る
 - タイルにはバッファが付くので、隣接タイルで同じ道路が二重に入る。延長を出すなら**タイル矩形でクリップ**してから集計する
 - **JARTIC の都道府県コードは JIS と異なる**（埼玉 = 12、JIS は 11）。コードでなく空間で絞る
-- 埼玉県警は**コード 15「道路の中央線」を提供していない**（16「中央線の変移」のみ）。JARTIC 全国でも 1,048 件・22 都道府県で、中央線の代替には使えない
+- 埼玉県警は**コード 15「道路の中央線」を提供していない**（16「中央線の変移」のみ）。JARTIC 全国でも 2,222 件・22 都道府県で、中央線の代替には使えない
 - **ゾーン30 はコード 114（面）**。線の差分だけでは残るので面内包で除外する（川越で 176 km）
 - 2025-07 と 2026-07 の規制データで川越の速度規制は件数・延長ともほぼ同一。施行前の駆け込み標識設置は見られない
 
@@ -232,6 +232,6 @@ docs/                       premise.md（前提と限界）, glossary.md（用�
 - 道路統計（全国版）: [国土交通省 道路統計年報 2024 道路の現況 表15/19/22/25](https://www.mlit.go.jp/road/ir/ir-data/tokei-nen/2024/nenpo02.html)（`data/official/`）、県境・市区町村境界（ビューワの行政区域表示・市区町村別集計）: [国土数値情報 N03-20240101（全国）](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2024.html)
 - 道路統計: 川越市[「道路の概要」](https://www.city.kawagoe.saitama.jp/kurashi/kotsu/1003125/1003150.html)、札幌市[「札幌の交通・道路 2023」](https://www.city.sapporo.jp/sogokotsu/date/2023/documents/2023-01_road.pdf)
 - [札幌市認定路線網図](https://ckan.pf-sapporo.jp/dataset/sapporo_authorized_road)（CC BY 4.0、道路法の認定路線・幅員つき）
-- 背景地図: [国土地理院 最適化ベクトルタイル](https://github.com/gsi-cyberjapan/optimal_bvmap)（`optimal_bvmap-v1` PMTiles）。標準スタイル `std.json` を `scripts/make_pale_style.py` で淡色化した `docs/style/pale.json` で描画。スプライト・グリフは地理院のものを参照
+- 背景地図: [国土地理院 最適化ベクトルタイル](https://github.com/gsi-cyberjapan/optimal_bvmap)（`optimal_bvmap-v1` PMTiles）。標準スタイル `std.json` を `scripts/make_pale_style.py` で淡色化した `viewer/public/pale.json` で描画。スプライト・グリフは地理院のものを参照
 
 コードは Apache License 2.0（[LICENSE](LICENSE)）。`viewer/public/tiles/*.pmtiles`・全国 PMTiles と `out/` の集計は上記データの派生物で、それぞれの利用規約に従います。

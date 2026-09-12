@@ -92,7 +92,7 @@ for code in sorted(n03["pref_code"].unique()):
         near = near[~near.index.duplicated(keep="first")]
         j.loc[miss, "code"] = near["code"]
     j = j[j["code"].notna()]
-    print(f"{code}: {len(roads)} segments, {int(miss.sum())} outside → nearest, {int((~j.index.isin(roads.index)).sum())} dropped")
+    print(f"{code}: {len(roads)} segments, {int(miss.sum())} outside → nearest, {len(roads) - len(j)} 未割り当て")
     for mcode, g in j.groupby("code"):
         info[mcode].update({"total_km": round(float(g["len_m"].sum()) / 1000, 1), "classes": tally(g, "final"),
                             "speed_before": tally(g, "speed_before"), "speed_after": tally(g, "speed_after")})
@@ -112,7 +112,8 @@ for v in info.values():
     changed = v["classes"].get(common.FINAL_CHANGED, 0.0)
     v["car_km"] = round(car, 1)
     v["changed_km"] = round(changed, 1)
-    v["pct"] = round(changed / car * 100, 1) if car > 0 else None
+    # car も changed も 0.1 km 単位に丸めてあるので、ほぼ全部が「変更」の村では 100 をわずかに超える
+    v["pct"] = min(100.0, round(changed / car * 100, 1)) if car > 0 else None
 
 OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
 OUT_JSON.write_text(json.dumps(info, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")

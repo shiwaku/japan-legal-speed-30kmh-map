@@ -37,7 +37,7 @@ export const FINAL_STYLE: ClassStyle[] = [
   { value: "対象外:高速等", color: "#000000", on: true },
   { value: "不明:属性不明", color: "#e377c2", on: true },
   // 車道以外。区分名は 2026-09 に言い換えたので新旧どちらも載せる(タイルは作った時点の名前)
-  { value: "非車道(軽車道・徒歩道等を除く)(ftCode)", color: "#bdbdbd", on: false },
+  { value: "非車道:軽車道・徒歩道等(ftCode)", color: "#bdbdbd", on: false },
   { value: "非通常道路(ftCode)", color: "#bdbdbd", on: false },
 ];
 
@@ -71,7 +71,7 @@ const DISPLAY: Record<string, string> = {
   "対象外:中央線(JARTIC)": "対象外: 中央線あり",
   "対象外:分離帯あり": "対象外: 中央分離帯あり",
   "対象外:高速等": "対象外: 高速道路",
-  "非車道(軽車道・徒歩道等を除く)(ftCode)": "車道以外（軽車道・徒歩道）",
+  "非車道:軽車道・徒歩道等(ftCode)": "車道以外（軽車道・徒歩道）",
   "非通常道路(ftCode)": "車道以外（軽車道・徒歩道）",
   "対象外": "車道以外",
   "不明(60/30)": "不明（60 か 30）",
@@ -209,7 +209,7 @@ export const MUNI_STEPS: [number, string][] = [
 export const WIDTH: Record<string, string> = { 0: "3 m 未満", 1: "3〜5.5 m", 2: "5.5〜13 m", 3: "13〜19.5 m", 4: "19.5 m 以上", 5: "その他", 6: "不明" };
 export const CTG: Record<string, string> = { 0: "国道", 1: "都道府県道", 2: "市区町村道", 3: "高速自動車国道等", 5: "その他", 6: "不明" };
 
-/** docs/areas.json(= public/areas.json)の 1 エリア。scripts/05 と make_national_summary が書く。 */
+/** public/areas.json の 1 エリア。scripts/05 と make_national_summary が書く。 */
 export interface AreaInfo {
   name: string;
   kind?: "japan" | "prefecture" | "city";

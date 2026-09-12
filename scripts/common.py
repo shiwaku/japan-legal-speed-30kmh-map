@@ -78,7 +78,7 @@ CLS_WIDE_UNKNOWN = "不明:幅員5.5m以上(中央線有無不明)"
 CLS_ATTR_UNKNOWN = "不明:属性不明"
 CLS_MEDIAN = "対象外:分離帯あり"
 CLS_MOTORWAY = "対象外:高速等"
-CLS_MINOR = "非車道(軽車道・徒歩道等を除く)(ftCode)"
+CLS_MINOR = "非車道:軽車道・徒歩道等(ftCode)"  # 車道(2701-2704)でないもの。この名前のタイルはまだ作っていない
 CLS_MINOR_OLD = "非通常道路(ftCode)"  # 2026-09 に言い換える前の名前(作り直していないタイルに入っている)
 
 FINAL_CHANGED = "★60→30 変更(推定)"
@@ -188,19 +188,7 @@ SPEED_UNKNOWN = "不明(60/30)"
 SPEED_EXPRESSWAY = "高速"
 SPEED_NA = "対象外"
 
-# 改正前後の速度の表示順と色。ビューワ(viewer/src/classes.ts)の SPEED_STYLE と同じ
-SPEED_STYLE = [
-    ("20", "#7f0000"),
-    ("30", "#d62728"),
-    ("40", "#ff7f0e"),
-    ("50", "#2ca02c"),
-    ("60", "#1f77b4"),
-    ("80", "#08306b"),
-    ("100", "#08306b"),
-    (SPEED_UNKNOWN, "#ff9f1c"),
-    (SPEED_EXPRESSWAY, "#000000"),
-    (SPEED_NA, "#bdbdbd"),
-]
+# 改正前後の速度の色は表示だけの話なので、ビューワ(viewer/src/classes.ts の SPEED_STYLE)に持たせている
 
 
 def speed_before_after(final: str, reg_speed, zone_speed) -> tuple[str, str]:
