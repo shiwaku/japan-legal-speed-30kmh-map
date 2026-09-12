@@ -219,6 +219,9 @@ export interface AreaInfo {
     official_total_km: number;
     gsi_normal_total_km: number;
     excess_km: number;
+    /** 構造的に対象 / 実際に 60→30 の km(割合の分子。全国合計はこれを足して出す) */
+    structural_km?: number;
+    changed_km?: number;
     structural_share_pct: [number, number];
     changed_share_pct: [number, number];
   } | null;

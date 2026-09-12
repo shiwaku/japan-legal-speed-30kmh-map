@@ -209,3 +209,51 @@ def speed_before_after(final: str, reg_speed, zone_speed) -> tuple[str, str]:
     if final == CLS_MOTORWAY:
         return SPEED_EXPRESSWAY, SPEED_EXPRESSWAY
     return SPEED_NA, SPEED_NA  # 軽車道・徒歩道など、判定対象から外したもの
+
+
+# ---- 道路法上の道路への換算 --------------------------------------------------
+# 地理院の中心線は私道・農道・未認定道路も含み、川越では市区町村道が道路統計の実延長を
+# 3 割ほど上回る。全国統計(道路法上の道路 123 万 km の約 7 割)と割合を比べるときは、
+# 市区町村道の超過分を「道路法適用外・幅員 5.5 m 未満・規制なし」とみなして分母と分子から
+# 引いた値を下限、引かない値を上限として幅で示す。道交法は私道にも及ぶので地図からは除かない。
+CTG_NAME = {0: "国道", 1: "都道府県道", 2: "市区町村道", 3: "高速自動車国道等", 5: "その他", 6: "不明"}  # 5 その他 = 道路法適用外(私道・農道等)。川越では出現しない
+CTG_ORDER = ["国道", "都道府県道", "市区町村道", "高速自動車国道等", "その他", "不明"]
+
+
+def official_compare(normal, official: dict):
+    """車道と道路統計の実延長を突き合わせ、(比較表, areas.json に入れる dict) を返す。
+
+    normal は車道(ftCode 2701-2704)だけに絞った DataFrame で、rdCtg・len_m・cls・final を持つもの。
+    official は areas/<key>.json の official_road_km。05(判定の直後)と update_official(道路統計を
+    差し替えたときの作り直し)の両方から呼ぶので、ここに置いて 1 か所にしている。
+    """
+    import pandas as pd
+
+    gsi_km = normal.groupby("rdCtg")["len_m"].sum() / 1000
+    gsi_km.index = [CTG_NAME.get(int(k), f"code{k}") for k in gsi_km.index]
+    cmp = pd.DataFrame(index=[n for n in CTG_ORDER if n in gsi_km.index or n in official])
+    cmp["GSI中心線 km"] = gsi_km.reindex(cmp.index)
+    cmp["道路統計 実延長 km"] = pd.Series({k: v for k, v in official.items() if k in CTG_ORDER}).reindex(cmp.index)
+    cmp["差 km"] = cmp["GSI中心線 km"] - cmp["道路統計 実延長 km"]
+
+    excess = max(0.0, float(cmp.loc["市区町村道", "差 km"])) if "市区町村道" in cmp.index and pd.notna(cmp.loc["市区町村道", "差 km"]) else 0.0
+    other = float(gsi_km.get("その他", 0.0))  # rdCtg=5 は明示的に道路法適用外
+    nonlaw = excess + other
+    total = normal.len_m.sum() / 1000
+    a_km = normal.loc[normal.cls == CLS_CANDIDATE, "len_m"].sum() / 1000    # 構造的に対象(推定)
+    b_km = normal.loc[normal.final == FINAL_CHANGED, "len_m"].sum() / 1000  # 実際に 60→30
+
+    def rng(x):
+        return (round((x - nonlaw) / (total - nonlaw) * 100, 1), round(x / total * 100, 1))
+
+    return cmp, {
+        "source": official.get("source"), "as_of": official.get("as_of"),
+        "official_total_km": round(float(cmp["道路統計 実延長 km"].sum()), 1),
+        "gsi_normal_total_km": round(float(total), 1),
+        "excess_km": round(nonlaw, 1),
+        "excess_detail": {"市区町村道の超過": round(excess, 1), "rdCtg=その他": round(other, 1)},
+        "structural_km": round(float(a_km), 1),
+        "changed_km": round(float(b_km), 1),
+        "structural_share_pct": rng(a_km),
+        "changed_share_pct": rng(b_km),
+    }

@@ -94,12 +94,7 @@ cand = roads[roads.cls == common.CLS_CANDIDATE]
 bins = pd.cut(cand.frac_speed, [-0.01, 0, 0.3, 0.5, 0.7, 0.9, 1.0])
 print("\n候補(5.5m未満)の frac_speed 分布 km:", {str(k): round(v, 1) for k, v in (cand.groupby(bins, observed=False)["len_m"].sum() / 1000).items()})
 
-# ---- 道路法上の道路への換算 -------------------------------------------------
-# 地理院の中心線は私道・農道・未認定道路も含み、川越では市区町村道が道路統計の実延長を
-# 3 割ほど上回る。全国統計(道路法上の道路 122 万 km の約 7 割)と割合を比べるときは、
-# 市区町村道の超過分を「道路法適用外・幅員 5.5 m 未満・規制なし」とみなして分母と分子から
-# 引いた値を下限、引かない値を上限として幅で示す。道交法は私道にも及ぶので地図からは除かない。
-CTG_NAME = {0: "国道", 1: "都道府県道", 2: "市区町村道", 3: "高速自動車国道等", 5: "その他", 6: "不明"}  # 5 その他 = 道路法適用外(私道・農道等)。川越では出現しない
+# ---- 道路法上の道路への換算(判定は common.official_compare) -----------------
 official = area.cfg.get("official_road_km")
 if not official or "市区町村道" not in official or not official.get("source"):
     raise SystemExit(
@@ -107,35 +102,12 @@ if not official or "市区町村道" not in official or not official.get("source
         "地理院中心線は私道・農道も含むので、道路統計との比較なしに割合を出すと全国統計と比べられない。"
         "市の『道路の概要』『道路現況』などから転記して再実行する。"
     )
-official_out = None
-if official:
-    normal = roads[roads.ftCode.between(2701, 2704)]
-    gsi_km = normal.groupby("rdCtg")["len_m"].sum() / 1000
-    gsi_km.index = [CTG_NAME.get(int(k), f"code{k}") for k in gsi_km.index]
-    order = ["国道", "都道府県道", "市区町村道", "高速自動車国道等", "その他", "不明"]
-    cmp = pd.DataFrame(index=[n for n in order if n in gsi_km.index or n in official])
-    cmp["GSI中心線 km"] = gsi_km.reindex(cmp.index)
-    cmp["道路統計 実延長 km"] = pd.Series({k: v for k, v in official.items() if k in order}).reindex(cmp.index)
-    cmp["差 km"] = cmp["GSI中心線 km"] - cmp["道路統計 実延長 km"]
-    print("\n## 地理院中心線(車道(軽車道・徒歩道等を除く)) と 道路統計 実延長 の比較\n", cmp.round(1).to_string())
-    excess = max(0.0, float(cmp.loc["市区町村道", "差 km"])) if "市区町村道" in cmp.index and pd.notna(cmp.loc["市区町村道", "差 km"]) else 0.0
-    other = float(gsi_km.get("その他", 0.0))  # rdCtg=5 は明示的に道路法適用外
-    nonlaw = excess + other
-    total = normal.len_m.sum() / 1000
-    a_km = normal.loc[normal.cls == common.CLS_CANDIDATE, "len_m"].sum() / 1000     # 構造的に対象(推定)
-    b_km = normal.loc[normal.final == common.FINAL_CHANGED, "len_m"].sum() / 1000  # 実際に 60→30
-    rng = lambda x: (round((x - nonlaw) / (total - nonlaw) * 100, 1), round(x / total * 100, 1))
-    official_out = {
-        "source": official.get("source"), "as_of": official.get("as_of"),
-        "official_total_km": round(float(cmp["道路統計 実延長 km"].sum()), 1),
-        "gsi_normal_total_km": round(float(total), 1),
-        "excess_km": round(nonlaw, 1),
-        "excess_detail": {"市区町村道の超過": round(excess, 1), "rdCtg=その他": round(other, 1)},
-        "structural_share_pct": rng(a_km),
-        "changed_share_pct": rng(b_km),
-    }
-    print(f"市区町村道の超過 {excess:.0f} km + rdCtg=その他 {other:.0f} km を道路法適用外とみなすと、車道(軽車道・徒歩道等を除く) {total:.0f} km に対する割合は"
-          f" 構造的に対象 {rng(a_km)[0]}〜{rng(a_km)[1]}% / 60→30 変更 {rng(b_km)[0]}〜{rng(b_km)[1]}%")
+cmp, official_out = common.official_compare(roads[roads.ftCode.between(2701, 2704)], official)
+print("\n## 地理院中心線(車道(軽車道・徒歩道等を除く)) と 道路統計 実延長 の比較\n", cmp.round(1).to_string())
+print(f"市区町村道の超過 {official_out['excess_detail']['市区町村道の超過']:.0f} km + rdCtg=その他 {official_out['excess_detail']['rdCtg=その他']:.0f} km を"
+      f"道路法適用外とみなすと、車道(軽車道・徒歩道等を除く) {official_out['gsi_normal_total_km']:.0f} km に対する割合は"
+      f" 構造的に対象 {official_out['structural_share_pct'][0]}〜{official_out['structural_share_pct'][1]}%"
+      f" / 60→30 変更 {official_out['changed_share_pct'][0]}〜{official_out['changed_share_pct'][1]}%")
 
 if not args.save:
     raise SystemExit

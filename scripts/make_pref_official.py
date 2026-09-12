@@ -6,6 +6,8 @@
   表22 都道府県別実延長内訳〈都道府県道〉 d_genkyou22.xlsx
   表25 都道府県別実延長内訳（市町村道）  d_genkyou25.xlsx
   高速自動車国道は表16 だが都道府県別の合計行で足りるので、合計 − (国道+都道府県道+市町村道) で出す。
+  どの表も都道府県の行に政令指定都市が含まれない(表の合計行 = 都道府県行 + 政令市行)ので、
+  政令市の行を親県に足す。足さないと 20 政令市分(表15 で 94,356 km)が抜ける。
 
     uv run python scripts/make_pref_official.py
 """
@@ -20,25 +22,32 @@ import common
 SRC = common.DATA / "official"
 OUT = SRC / "prefectures.json"
 URL = "https://www.mlit.go.jp/road/ir/ir-data/tokei-nen/2024/nenpo02.html"
-PREF_ROW = re.compile(r"^(\d{2})(\S+)$")
+PREF_ROW = re.compile(r"^(\d{2})(\d{2})?(\S+)$")  # 「01北海道」(都道府県) と「0110札幌市」(県コード + 市コード)
 
 
 def read_table(name):
-    """'01北海道' の行を {code: [数値...]} で返す。政令市の行(コードなし)は飛ばす。"""
+    """'01北海道' の行に、別行になっている政令市('0110札幌市')を足して {code: (県名, [数値...])} で返す。
+
+    都道府県の行には政令指定都市が含まれない(表の合計行 = 都道府県行 + 政令市行)。足さないと
+    表25 の市町村道で 84,341 km 抜け、神奈川県は実延長が半分(11,806 → 23,632 km)になる。
+    """
     ws = openpyxl.load_workbook(SRC / name, read_only=True, data_only=True).worksheets[0]
-    out = {}
+    names, vals = {}, {}
     for r in ws.iter_rows(values_only=True):
         if not r or not isinstance(r[0], str):
             continue
         m = PREF_ROW.match(r[0].replace(" ", "").replace("　", ""))
         if not m:
             continue
-        code, pname = m.groups()
-        if not pname.endswith(("都", "道", "府", "県")):  # 政令市の行(「10札幌市」など)は飛ばす
-            continue
-        vals = [float(v) if isinstance(v, (int, float)) else None for v in r[1:]]
-        out[code] = (pname, vals)
-    return out
+        code, city, pname = m.groups()
+        if city is None:
+            if not pname.endswith(("都", "道", "府", "県")):  # 「合計」など都道府県でない行
+                continue
+            names[code] = pname
+        v = [float(x) if isinstance(x, (int, float)) else None for x in r[1:]]
+        cur = vals.get(code)
+        vals[code] = v if cur is None else [None if a is None and b is None else (a or 0) + (b or 0) for a, b in zip(cur, v)]
+    return {c: (names[c], vals[c]) for c in sorted(names)}
 
 
 def km(v):
