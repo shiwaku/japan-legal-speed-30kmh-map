@@ -71,6 +71,8 @@ gdf.drop(columns=["geom_city"]).to_parquet(area.out / "roads_z16.parquet")
 gc = gdf[gdf.in_city].drop(columns=["geometry"]).rename(columns={"geom_city": "geometry"})
 gc = gpd.GeoDataFrame(gc, geometry="geometry", crs=area.epsg)
 gc = gc[~gc.geometry.is_empty]
+# 05 は parquet を優先して読む。03' (GDAL 版) と混ぜたときに古い parquet が残らないよう、こちらも書く
+gc.to_parquet(area.out / "roads_city.parquet")
 gc.to_crs(4326).to_file(area.out / "roads_city.geojson", driver="GeoJSON")
 
 

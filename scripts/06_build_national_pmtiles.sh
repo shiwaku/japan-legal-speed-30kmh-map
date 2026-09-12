@@ -25,7 +25,7 @@ tippecanoe -o "$W/out.pmtiles" --force \
   -Z12 -z16 --no-tile-size-limit --no-feature-limit \
   --read-parallel \
   -y final -y cls -y rnkWidth -y medSect -y rdCtg -y ftCode -y orgGILvl \
-  -y reg_speed -y zone_speed -y len_m -y speed_before -y speed_after \
+  -y reg_speed -y zone_speed -y frac_speed -y frac_zone -y len_m -y speed_before -y speed_after \
   "$W"/pref_*.fgb
 
 mkdir -p "$(dirname "$DST")"

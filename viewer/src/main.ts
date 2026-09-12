@@ -456,11 +456,13 @@ map.on("click", "roads", (e) => {
   const rows = [
     row("速度", `${esc(sp(p.speed_before))} → <b>${esc(sp(p.speed_after))}</b>`),
     row("幅員区分", esc(WIDTH[String(p.rnkWidth)] ?? p.rnkWidth)),
-    row("中央分離帯", String(p.medSect) === "0" ? "なし" : `${esc(p.medSect)} m`),
+    // medSect 99 は「幅員急変等で非表示」で、分離帯の幅ではない
+    row("中央分離帯", String(p.medSect) === "0" ? "なし" : String(p.medSect) === "99" ? "不明" : `${esc(p.medSect)} m`),
     row("道路分類", esc(CTG[String(p.rdCtg)] ?? p.rdCtg)),
   ];
-  if (p.reg_speed) rows.push(row("速度規制", `${esc(p.reg_speed)} km/h（重なり ${pct(p.frac_speed)}）`));
-  if (p.zone_speed) rows.push(row("面規制", `${esc(p.zone_speed)}（内包 ${pct(p.frac_zone)}）`));
+  // frac_* は市区町村タイルにしか入っていない(全国タイルは属性を絞っている)ので、無ければ率を出さない
+  if (p.reg_speed) rows.push(row("速度規制", `${esc(p.reg_speed)} km/h${p.frac_speed == null ? "" : `（重なり ${pct(p.frac_speed)}）`}`));
+  if (p.zone_speed) rows.push(row("面規制", `${esc(p.zone_speed)}${p.frac_zone == null ? "" : `（内包 ${pct(p.frac_zone)}）`}`));
   rows.push(row("区間長", `${Math.round(Number(p.len_m))} m`));
   popup?.remove();
   popup = new maplibregl.Popup({ closeButton: true, maxWidth: "300px" })
