@@ -158,6 +158,8 @@ html, body {
 .stat { margin: 0; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--hover); font-size: 12px; line-height: 1.6; color: var(--ink-2); }
 .stat b { color: var(--ink); }
 .stat-meta { display: block; margin-top: 4px; font-size: 10.5px; color: var(--ink-3); }
+.stat-warn { display: block; margin-top: 6px; padding: 5px 7px; border-radius: 4px; font-size: 11px; line-height: 1.5;
+  color: var(--ink); background: rgba(214, 39, 40, 0.12); border-left: 3px solid #d62728; }
 
 /* 市区町村のホバー(マウス環境のみ) */
 .pop-hover .maplibregl-popup-content { padding: 6px 9px; border-radius: var(--radius-sm); box-shadow: var(--shadow); }

@@ -432,6 +432,11 @@ function renderLegend(): void {
     if (r) s += `。変更率は全国 ${rankTotal.toLocaleString()} 地区（政令市は区単位）中 <b>${r.toLocaleString()} 位</b>`;
     s += `。市区町村への割り当ては線分の中点で行い、道路法換算は都道府県のみ`;
   }
+  // 兵庫の「全域 40 キロ」区域規制は施行と同時に廃止されたが、施行前の JARTIC には残っている。
+  // データを入れ替えるまで兵庫の変更率は低く出るので、その旨を出す(docs/premise.md と #21)
+  if ((m ? m.pref_code : a.pref_code) === "28") {
+    s += `<span class="stat-warn">⚠ 兵庫県の「全域 40 キロ」区域規制は 2026-09-01 に廃止されましたが、規制データ（${a.jartic_month.slice(0, 4)}-${a.jartic_month.slice(4)}）にはまだ残っています。実際の変更率はこれより高く、県全体では約 79% と見られます</span>`;
+  }
   s += `<span class="stat-meta">規制データ JARTIC ${a.jartic_month.slice(0, 4)}-${a.jartic_month.slice(4)} / 生成 ${a.generated}</span>`;
   statEl.innerHTML = s;
 }
