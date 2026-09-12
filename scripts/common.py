@@ -78,7 +78,7 @@ CLS_WIDE_UNKNOWN = "不明:幅員5.5m以上(中央線有無不明)"
 CLS_ATTR_UNKNOWN = "不明:属性不明"
 CLS_MEDIAN = "対象外:分離帯あり"
 CLS_MOTORWAY = "対象外:高速等"
-CLS_MINOR = "非車道:軽車道・徒歩道等(ftCode)"  # 車道(2701-2704)でないもの。この名前のタイルはまだ作っていない
+CLS_MINOR = "非車道(ftCode)"  # 2701-2704(２条道路中心線)以外＝庭園路・徒歩道・石段。この名前のタイルはまだ作っていない
 CLS_MINOR_OLD = "非通常道路(ftCode)"  # 2026-09 に言い換える前の名前(作り直していないタイルに入っている)
 
 FINAL_CHANGED = "★60→30 変更(推定)"
@@ -124,7 +124,7 @@ def classify_width(ftCode: int, rdCtg, rnkWidth, medSect, motorway) -> str:
       motorway 0:高速以外 1:高速 9:不明   ← 実データは 99% が 9 なので「1 のみ除外」
       rdCtg    3:高速自動車国道等
     """
-    if not 2701 <= ftCode <= 2704:  # 軽車道(271x)・徒歩道(272x)・庭園路(273x)など
+    if not 2701 <= ftCode <= 2704:  # 庭園路(271x)・徒歩道(272x)・石段(273x)。2701-2704 が２条道路中心線
         return CLS_MINOR
     if motorway == 1 or rdCtg == 3:
         return CLS_MOTORWAY
@@ -167,7 +167,7 @@ def classify_final(
     判定は動かない)。
     """
     # CLS_MINOR_OLD も弾く。言い換える前の 03 の出力(roads_city.parquet)に対して 05 を回し直すと、
-    # 軽車道・徒歩道が素通りして「規制あり」に化ける(全国 8,900 km)
+    # 庭園路・徒歩道・石段が素通りして「規制あり」に化ける(全国 8,900 km)
     if cls in (CLS_MINOR, CLS_MINOR_OLD, CLS_MOTORWAY, CLS_MEDIAN):
         return cls
     sign_hit = frac_speed >= th_line
@@ -212,7 +212,7 @@ def speed_before_after(final: str, reg_speed, zone_speed) -> tuple[str, str]:
         return "60", "60"
     if final == CLS_MOTORWAY:
         return SPEED_EXPRESSWAY, SPEED_EXPRESSWAY
-    return SPEED_NA, SPEED_NA  # 軽車道・徒歩道など、判定対象から外したもの
+    return SPEED_NA, SPEED_NA  # 庭園路・徒歩道・石段など、判定対象から外したもの
 
 
 # ---- 道路法上の道路への換算 --------------------------------------------------

@@ -92,7 +92,7 @@ class ClassifyFinalTest(unittest.TestCase):
         self.assertEqual(self.f(cls=common.CLS_WIDE_UNKNOWN, frac_speed=1.0, reg_speed="50"), "規制あり:標識50")
 
     def test_excluded_classes_pass_through(self):
-        # CLS_MINOR_OLD も含める。言い換える前の 03 の出力に 05 を回し直したとき、軽車道・徒歩道が
+        # CLS_MINOR_OLD も含める。言い換える前の 03 の出力に 05 を回し直したとき、庭園路・徒歩道・石段が
         # 素通りして「規制あり」に化けていた(全国 8,900 km)
         for c in (common.CLS_MINOR, common.CLS_MINOR_OLD, common.CLS_MOTORWAY, common.CLS_MEDIAN):
             self.assertEqual(self.f(cls=c, frac_speed=1.0, reg_speed="40"), c)

@@ -104,7 +104,7 @@ for code in sorted(n03["pref_code"].unique()):
 
 info = {k: v for k, v in info.items() if "total_km" in v}
 
-# 車道(中心線から軽車道・徒歩道等を除いたもの)と変更率。面塗り・ランキングに使う。
+# 車道(中心線から庭園路・徒歩道・石段を除いたもの)と変更率。面塗り・ランキングに使う。
 # 区分名は言い換えられることがあるので "(ftCode)" で終わるものを非車道として引く
 for v in info.values():
     non_road = sum(km for cls, km in v["classes"].items() if cls.endswith("(ftCode)"))
