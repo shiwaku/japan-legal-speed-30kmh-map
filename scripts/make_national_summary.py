@@ -57,7 +57,7 @@ official_total = sum(m["official"]["official_total_km"] for _, m in prefs.values
 gsi_normal = sum(m["official"]["gsi_normal_total_km"] for _, m in prefs.values() if m.get("official"))
 excess = sum(m["official"]["excess_km"] for _, m in prefs.values() if m.get("official"))
 changed = classes.get(common.FINAL_CHANGED, 0)
-structural = sum(m["official"]["structural_share_pct"][1] / 100 * m["official"]["gsi_normal_total_km"] for _, m in prefs.values() if m.get("official"))
+structural = sum(m["official"]["structural_km"] for _, m in prefs.values() if m.get("official"))
 rng = lambda x: [round((x - excess) / (gsi_normal - excess) * 100, 1), round(x / gsi_normal * 100, 1)]
 manifest["japan"] = {
     "name": f"全国({len(prefs)} 都道府県)",
@@ -110,5 +110,9 @@ for r in df.itertuples(index=False):
 j = manifest["japan"]
 print(f"全国 {len(prefs)} 都道府県: 中心線 {total:,.0f} km / 車道 {gsi_normal:,.0f} km / 道路統計 {official_total:,.0f} km")
 print(f"  60→30 変更 {changed:,.0f} km = 車道の {changed / gsi_normal * 100:.1f}% / 道路法道路に換算 {j['official']['changed_share_pct'][0]}〜{j['official']['changed_share_pct'][1]}%")
-print(f"  構造的に対象(5.5m未満・分離帯なし) 道路法道路に換算 {j['official']['structural_share_pct'][0]}〜{j['official']['structural_share_pct'][1]}%  (道路統計年報の 5.5m 未満 = 71.0%)")
+# 報道の「約 7 割」と並べる参考値。道路統計年報 表15 の幅員別実延長から、実延長で重み付けした全国値
+lt55 = sum((cfg.get("official_width") or {}).get("share_lt_5_5m_pct", 0) / 100 * m["official"]["official_total_km"]
+           for cfg, m in prefs.values() if m.get("official"))
+print(f"  構造的に対象(5.5m未満・分離帯なし) 道路法道路に換算 {j['official']['structural_share_pct'][0]}〜{j['official']['structural_share_pct'][1]}%"
+      f"  (道路統計年報の 5.5m 未満 = {lt55 / official_total * 100:.1f}%)")
 print(f"  → {outdir / 'prefectures.csv'}, {manifest_path}")
