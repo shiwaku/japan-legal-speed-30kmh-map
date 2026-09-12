@@ -420,7 +420,7 @@ function renderLegend(): void {
     row.append(input, sw, text, val);
     legendDiv.append(row);
   }
-  // 要約。車道 = 中心線から軽車道・徒歩道等を除いたもの
+  // 要約。車道 = 中心線から庭園路・徒歩道・石段を除いたもの
   const changed = m ? m.changed_km : a.classes[CHANGED] ?? 0;
   const carKm = m ? m.car_km : a.official?.gsi_normal_total_km ?? a.total_km;
   const name = m ? `${m.pref_name} ${m.name}` : a.name;

@@ -103,9 +103,9 @@ if not official or "市区町村道" not in official or not official.get("source
         "市の『道路の概要』『道路現況』などから転記して再実行する。"
     )
 cmp, official_out = common.official_compare(roads[roads.ftCode.between(2701, 2704)], official)
-print("\n## 地理院中心線(車道(軽車道・徒歩道等を除く)) と 道路統計 実延長 の比較\n", cmp.round(1).to_string())
+print("\n## 地理院中心線(車道) と 道路統計 実延長 の比較\n", cmp.round(1).to_string())
 print(f"市区町村道の超過 {official_out['excess_detail']['市区町村道の超過']:.0f} km + rdCtg=その他 {official_out['excess_detail']['rdCtg=その他']:.0f} km を"
-      f"道路法適用外とみなすと、車道(軽車道・徒歩道等を除く) {official_out['gsi_normal_total_km']:.0f} km に対する割合は"
+      f"道路法適用外とみなすと、車道 {official_out['gsi_normal_total_km']:.0f} km に対する割合は"
       f" 構造的に対象 {official_out['structural_share_pct'][0]}〜{official_out['structural_share_pct'][1]}%"
       f" / 60→30 変更 {official_out['changed_share_pct'][0]}〜{official_out['changed_share_pct'][1]}%")
 

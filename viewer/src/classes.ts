@@ -37,7 +37,7 @@ export const FINAL_STYLE: ClassStyle[] = [
   { value: "対象外:高速等", color: "#000000", on: true },
   { value: "不明:属性不明", color: "#e377c2", on: true },
   // 車道以外。区分名は 2026-09 に言い換えたので新旧どちらも載せる(タイルは作った時点の名前)
-  { value: "非車道:軽車道・徒歩道等(ftCode)", color: "#bdbdbd", on: false },
+  { value: "非車道(ftCode)", color: "#bdbdbd", on: false },
   { value: "非通常道路(ftCode)", color: "#bdbdbd", on: false },
 ];
 
@@ -71,8 +71,8 @@ const DISPLAY: Record<string, string> = {
   "対象外:中央線(JARTIC)": "対象外: 中央線あり",
   "対象外:分離帯あり": "対象外: 中央分離帯あり",
   "対象外:高速等": "対象外: 高速道路",
-  "非車道:軽車道・徒歩道等(ftCode)": "車道以外（軽車道・徒歩道）",
-  "非通常道路(ftCode)": "車道以外（軽車道・徒歩道）",
+  "非車道(ftCode)": "車道以外（庭園路・徒歩道・石段）",
+  "非通常道路(ftCode)": "車道以外（庭園路・徒歩道・石段）",
   "対象外": "車道以外",
   "不明(60/30)": "不明（60 か 30）",
   "高速": "高速道路",

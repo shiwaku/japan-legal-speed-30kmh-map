@@ -86,7 +86,7 @@ inc = gdf[gdf.in_city]
 print(f"{area.name}: features {len(gdf)}, 市域内 {len(inc)}, 市域内延長 {inc.len_city_m.sum() / 1000:.1f} km\n")
 print("## ftCode\n", tab(inc, "ftCode"), "\n")
 cl = inc[inc.ftCode.between(2701, 2704)]
-print("## 車道(軽車道・徒歩道等を除く) (ftCode 2701-2704) --------------------------------------")
+print("## 車道(庭園路・徒歩道・石段を除く) (ftCode 2701-2704) --------------------------------------")
 for col in ("rnkWidth", "medSect", "rdCtg", "motorway", "orgGILvl"):
     print(f"## {col}\n", tab(cl, col), "\n")
 print("## rnkWidth x rdCtg (km)\n", (cl.pivot_table(index="rnkWidth", columns="rdCtg", values="len_city_m", aggfunc="sum", fill_value=0) / 1000).round(1), "\n")
