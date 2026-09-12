@@ -78,13 +78,21 @@ const DISPLAY: Record<string, string> = {
   "高速": "高速道路",
 };
 
+/**
+ * 面規制の表示名。「ゾーン30」は制度の名前だが、それ以外の速度は区域最高速度規制で別物なので
+ * 「ゾーン40」とは呼ばない（兵庫県に広くある 40 km/h の区域規制など）。
+ */
+function zoneLabel(v: number): string {
+  return v === 30 ? "ゾーン30" : `区域規制 ${v} km/h`;
+}
+
 /** 区分名の表示ラベル。「規制あり:標識40」→「標識 40 km/h（変わらない）」。 */
 export function label(mode: Mode, value: string): string {
   if (mode !== "final") return /^\d+$/.test(value) ? `${value} km/h` : DISPLAY[value] ?? value;
   const sign = /^規制あり:標識(\d+)$/.exec(value);
   if (sign) return `標識 ${sign[1]} km/h（変わらない）`;
   const zone = /^規制あり:ゾーン(\d+)$/.exec(value);
-  if (zone) return `ゾーン${zone[1]}（変わらない）`;
+  if (zone) return `${zoneLabel(Number(zone[1]))}（変わらない）`;
   return DISPLAY[value] ?? value;
 }
 
@@ -139,8 +147,8 @@ function groupOf(mode: Mode, value: string): { key: string; label: string; secti
     const zone = /^規制あり:ゾーン(\d+)$/.exec(value);
     if (zone) {
       const v = Number(zone[1]);
-      if (v < 30) return { key: "zone-le20", label: "ゾーン20 以下", section: SECTIONS.same };
-      return { key: `zone-${v}`, label: `ゾーン${v}`, section: SECTIONS.same };
+      if (v < 30) return { key: "zone-le20", label: "区域規制 20 km/h 以下", section: SECTIONS.same };
+      return { key: `zone-${v}`, label: zoneLabel(v), section: SECTIONS.same };
     }
     if (value.startsWith("対象外")) {
       return { key: value, label: (DISPLAY[value] ?? value).replace(/^対象外: ?/, ""), section: SECTIONS.out };
