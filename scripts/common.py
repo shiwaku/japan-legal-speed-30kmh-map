@@ -137,6 +137,14 @@ def classify_width(ftCode: int, rdCtg, rnkWidth, medSect, motorway) -> str:
     return CLS_CANDIDATE
 
 
+def _faster(a, b) -> bool:
+    """速度 a が b より速いか。JARTIC の速度は文字列で、欠けていることもある。"""
+    try:
+        return float(a) > float(b)
+    except (TypeError, ValueError):
+        return False
+
+
 def classify_final(
     cls: str,
     frac_speed: float,
@@ -152,12 +160,20 @@ def classify_final(
 
     frac_* は「GSI 線分の長さのうち、規制線のバッファ(or 面規制)に入る比率」。
     交差点で接する脇道が端点だけで引っかからないよう、交差ではなく比率で見る。
+
+    面(区域規制)と線(標識)が両方かかるときは、標識の方が速いなら標識を採る。区域規制は
+    個別の指定がある道路には及ばないため。逆(標識の方が遅い)は面のままにしている
+    (ゾーン30 の中の 40 標識をどう扱うかは未決。どちらでも「変わらない」ので 60→30 の
+    判定は動かない)。
     """
-    if cls in (CLS_MINOR, CLS_MOTORWAY, CLS_MEDIAN):
+    # CLS_MINOR_OLD も弾く。言い換える前の 03 の出力(roads_city.parquet)に対して 05 を回し直すと、
+    # 軽車道・徒歩道が素通りして「規制あり」に化ける(全国 8,900 km)
+    if cls in (CLS_MINOR, CLS_MINOR_OLD, CLS_MOTORWAY, CLS_MEDIAN):
         return cls
-    if frac_zone >= th_poly:
+    sign_hit = frac_speed >= th_line
+    if frac_zone >= th_poly and not (sign_hit and _faster(reg_speed, zone_speed)):
         return f"規制あり:ゾーン{zone_speed}"
-    if frac_speed >= th_line:
+    if sign_hit:
         return f"規制あり:標識{reg_speed}"
     if frac_lane >= th_line:
         return FINAL_LANE

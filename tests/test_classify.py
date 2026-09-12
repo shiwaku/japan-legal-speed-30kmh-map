@@ -67,6 +67,22 @@ class ClassifyFinalTest(unittest.TestCase):
         self.assertEqual(self.f(frac_zone=0.8, zone_speed="30"), "規制あり:ゾーン30")
         self.assertEqual(self.f(frac_zone=0.3, zone_speed="30"), common.FINAL_CHANGED)
 
+    def test_faster_sign_beats_area_regulation(self):
+        # 兵庫の 40 km/h 区域規制の中にある 80 km/h 標識の幹線を 40 と表示していた(全国 2,296 km)
+        self.assertEqual(self.f(frac_zone=0.8, zone_speed="40", frac_speed=0.9, reg_speed="80"), "規制あり:標識80")
+        # 標識の方が遅いときは面のまま(ゾーン30 の中の 40 標識の扱いは未決)
+        self.assertEqual(self.f(frac_zone=0.8, zone_speed="40", frac_speed=0.9, reg_speed="30"), "規制あり:ゾーン40")
+        # 同じ速度、重なりが足りない標識、速度が欠けている規制は面のまま
+        self.assertEqual(self.f(frac_zone=0.8, zone_speed="40", frac_speed=0.9, reg_speed="40"), "規制あり:ゾーン40")
+        self.assertEqual(self.f(frac_zone=0.8, zone_speed="40", frac_speed=0.3, reg_speed="80"), "規制あり:ゾーン40")
+        self.assertEqual(self.f(frac_zone=0.8, zone_speed=None, frac_speed=0.9, reg_speed="80"), "規制あり:ゾーンNone")
+
+    def test_area_regulation_does_not_change_the_60_to_30_verdict(self):
+        # 面が勝っても線が勝っても「規制あり」= 変わらないなので、改正前後の速度は標識の値で揃う
+        for zone, sign, expect in (("40", "80", "80"), ("40", "30", "40"), ("30", "30", "30")):
+            f = self.f(frac_zone=0.8, zone_speed=zone, frac_speed=0.9, reg_speed=sign)
+            self.assertEqual(common.speed_before_after(f, sign, zone), (expect, expect))
+
     def test_lane_and_centerline(self):
         self.assertEqual(self.f(frac_lane=0.9), common.FINAL_LANE)
         self.assertEqual(self.f(frac_cl=0.9), common.FINAL_CENTERLINE)
@@ -76,8 +92,11 @@ class ClassifyFinalTest(unittest.TestCase):
         self.assertEqual(self.f(cls=common.CLS_WIDE_UNKNOWN, frac_speed=1.0, reg_speed="50"), "規制あり:標識50")
 
     def test_excluded_classes_pass_through(self):
-        for c in (common.CLS_MINOR, common.CLS_MOTORWAY, common.CLS_MEDIAN):
+        # CLS_MINOR_OLD も含める。言い換える前の 03 の出力に 05 を回し直したとき、軽車道・徒歩道が
+        # 素通りして「規制あり」に化けていた(全国 8,900 km)
+        for c in (common.CLS_MINOR, common.CLS_MINOR_OLD, common.CLS_MOTORWAY, common.CLS_MEDIAN):
             self.assertEqual(self.f(cls=c, frac_speed=1.0, reg_speed="40"), c)
+            self.assertEqual(self.f(cls=c, frac_zone=1.0, zone_speed="30"), c)
 
     def test_thresholds_are_parameters(self):
         self.assertEqual(common.classify_final(common.CLS_CANDIDATE, 0.6, "40", 0, None, 0, 0, th_line=0.5), "規制あり:標識40")
