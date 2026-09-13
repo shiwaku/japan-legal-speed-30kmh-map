@@ -465,9 +465,14 @@ map.on("click", "roads", (e) => {
     row("中央分離帯", String(p.medSect) === "0" ? "なし" : String(p.medSect) === "99" ? "不明" : `${esc(p.medSect)} m`),
     row("道路分類", esc(CTG[String(p.rdCtg)] ?? p.rdCtg)),
   ];
+  // reg_speed / zone_speed は「この線分に最も大きく重なった規制」で、重なり率がしきい値に届かなければ
+  // 判定には使っていない。それを「速度規制 40 km/h」と出すと、交差点で 40 km/h 規制の道に丁字でぶつかる
+  // だけの脇道が「速度規制 40 km/h なのに 60→30」と読めてしまう(埼玉では変更判定の 21% がこれ)ので、
+  // 判定に採用された規制だけ出す。
   // frac_* は市区町村タイルにしか入っていない(全国タイルは属性を絞っている)ので、無ければ率を出さない
-  if (p.reg_speed) rows.push(row("速度規制", `${esc(p.reg_speed)} km/h${p.frac_speed == null ? "" : `（重なり ${pct(p.frac_speed)}）`}`));
-  if (p.zone_speed) rows.push(row("面規制", `${esc(p.zone_speed)}${p.frac_zone == null ? "" : `（内包 ${pct(p.frac_zone)}）`}`));
+  const fin = String(p.final ?? "");
+  if (fin.startsWith("規制あり:標識") && p.reg_speed) rows.push(row("速度規制", `${esc(p.reg_speed)} km/h${p.frac_speed == null ? "" : `（重なり ${pct(p.frac_speed)}）`}`));
+  if (fin.startsWith("規制あり:ゾーン") && p.zone_speed) rows.push(row("面規制", `${esc(p.zone_speed)}${p.frac_zone == null ? "" : `（内包 ${pct(p.frac_zone)}）`}`));
   rows.push(row("区間長", `${Math.round(Number(p.len_m))} m`));
   popup?.remove();
   popup = new maplibregl.Popup({ closeButton: true, maxWidth: "300px" })
