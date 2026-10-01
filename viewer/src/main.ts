@@ -2,6 +2,7 @@ import maplibregl from "maplibre-gl";
 import { Protocol } from "pmtiles";
 import "maplibre-gl/dist/maplibre-gl.css";
 
+import { addAccidentLayers, accidentsEnabled, hitAccident, initAccidents } from "./accident/layers";
 import { BASEMAPS, getBasemapStyle, insertBeforeId, type Basemap } from "./basemap";
 import { CHANGED, CTG, MODES, MUNI_STEPS, WIDTH, defaultOff, label, legendRows, type AreaInfo, type Mode, type MuniInfo } from "./classes";
 import { applyThemeAttr, initialTheme, type Theme } from "./theme";
@@ -160,6 +161,7 @@ function addDataLayers(): void {
       "text-opacity": ["interpolate", ["linear"], ["zoom"], 9, ["case", [">", ["get", "car_km"], 1000], 1, 0], 10, 1],
     },
   } as unknown as maplibregl.LayerSpecification);
+  addAccidentLayers(map, before);
   applyStyle();
 }
 
@@ -281,7 +283,7 @@ function setArea(key: string, jump: boolean): void {
 }
 
 function syncUrl(): void {
-  history.replaceState(null, "", `?area=${current}${muni ? `&muni=${muni}` : ""}${location.hash}`);
+  history.replaceState(null, "", `?area=${current}${muni ? `&muni=${muni}` : ""}${accidentsEnabled() ? "&acc=1" : ""}${location.hash}`);
 }
 
 // ---- 市区町村(全国から検索、地図クリックでも選べる) ----
@@ -456,6 +458,7 @@ const pct = (v: unknown): string => (v == null || v === "" ? "-" : `${Math.round
 const sp = (v: unknown): string => (/^\d+$/.test(String(v)) ? `${v} km/h` : label("speed_after", String(v)));
 let popup: maplibregl.Popup | null = null;
 map.on("click", "roads", (e) => {
+  if (hitAccident(map, e.point)) return; // 事故の点を押したときは事故のポップアップだけ出す
   const p = (e.features?.[0]?.properties ?? {}) as Record<string, unknown>;
   const row = (k: string, v: string) => `<tr><th>${esc(k)}</th><td>${v}</td></tr>`;
   const rows = [
@@ -507,6 +510,7 @@ if (window.matchMedia("(hover: hover)").matches) {
 const buildEl = document.getElementById("build-ver");
 if (buildEl) buildEl.textContent = `build ${__BUILD_TIME__}`;
 renderThemeBtn();
+initAccidents(map, params.get("acc") === "1", syncUrl);
 if (isMobile) panel.classList.add("collapsed"); // スマホは畳んで地図を広く
 renderCollapseBtn();
 renderScale();

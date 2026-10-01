@@ -160,6 +160,7 @@ main に `viewer/**` の変更が入ると `.github/workflows/deploy-viewer.yml`
 | 表示 | 判定 / 改正前の速度 / 改正後の速度（<kbd>B</kbd> で前後トグル） |
 | 凡例 | 区分ごとに表示 ON/OFF、延長 km を併記。全ON/全OFF。「標識 60 km/h 以上」のように引き下げと関係のない区分は 1 行にまとめる（細かい区分はクリックしたときのポップアップで出る） |
 | 背景 | 淡色 / 標準（地理院 最適化ベクトルタイル）/ 写真（地理院 全国最新写真）/ 白図 |
+| 交通事故 | 警察庁 交通事故統計オープンデータ（2019〜2024 年の人身事故 1,895,275 件）を点またはヒートマップで重ねる（既定 OFF、`?acc=1` で ON）。死亡/負傷・発生年・昼夜・関与当事者・年齢階層で絞り込み、点をクリックすると事故の詳細が出る。レイヤー・フィルタ・ポップアップと PMTiles は [npa-traffic-accident-converter](https://github.com/shiwaku/npa-traffic-accident-converter) のビューワから移植（`viewer/src/accident/`）。**改正前の 6 年間の事故**であり、30 km/h 化の効果を示すものではない。PMTiles は z12 未満で間引かれているので、広域の点の数を件数と読まないこと |
 | テーマ | ライト / ダーク。既定はダーク（判定の色が地図の上で見分けやすい）。切り替えると localStorage に残る |
 | スマホ | 640px 以下はボトムシート。初期は畳んで地図を広く。保持タイル数と描画解像度を絞って WebGL コンテキスト消失を防ぐ |
 | PWA | manifest + アイコン。Service Worker は index.html だけネットワーク優先（Pages の 10 分キャッシュ対策）、タイルには介入しない |
@@ -237,6 +238,7 @@ docs/                       premise.md（前提と限界）, glossary.md（用�
 - 道路統計（全国版）: [国土交通省 道路統計年報 2024 道路の現況 表15/19/22/25](https://www.mlit.go.jp/road/ir/ir-data/tokei-nen/2024/nenpo02.html)（`data/official/`）、県境・市区町村境界（ビューワの行政区域表示・市区町村別集計）: [国土数値情報 N03-20240101（全国）](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2024.html)
 - 道路統計: 川越市[「道路の概要」](https://www.city.kawagoe.saitama.jp/kurashi/kotsu/1003125/1003150.html)、札幌市[「札幌の交通・道路 2023」](https://www.city.sapporo.jp/sogokotsu/date/2023/documents/2023-01_road.pdf)
 - [札幌市認定路線網図](https://ckan.pf-sapporo.jp/dataset/sapporo_authorized_road)（CC BY 4.0、道路法の認定路線・幅員つき）
+- 交通事故: [警察庁 交通事故統計情報のオープンデータ](https://www.npa.go.jp/publications/statistics/koutsuu/opendata/index_opendata.html)（本票 2019〜2024 年、政府標準利用規約 第2.0版）を加工して作成。PMTiles は [npa-traffic-accident-converter](https://github.com/shiwaku/npa-traffic-accident-converter) で作成したもの
 - 背景地図: [国土地理院 最適化ベクトルタイル](https://github.com/gsi-cyberjapan/optimal_bvmap)（`optimal_bvmap-v1` PMTiles）。標準スタイル `std.json` を `scripts/make_pale_style.py` で淡色化した `viewer/public/pale.json` で描画。スプライト・グリフは地理院のものを参照
 
 コードは Apache License 2.0（[LICENSE](LICENSE)）。`viewer/public/tiles/*.pmtiles`・全国 PMTiles と `out/` の集計は上記データの派生物で、それぞれの利用規約に従います。
