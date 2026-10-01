@@ -220,3 +220,42 @@ html, body {
   .segmented button { padding: 9px 0; }
   .lead { display: none; } /* スマホでは説明文を省いて凡例を優先 */
 }
+
+/* ---- 交通事故(npa-traffic-accident-converter/viewer から移植。色はこのビューワのトークンに合わせた) ---- */
+:root { --fatal: #e8003a; --injury: #2563eb; }
+.acc-opts { padding: 2px 8px 0; }
+.acc-sec { margin: 10px 0 5px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; color: var(--ink-3); }
+.acc-note { font-weight: 400; letter-spacing: 0; }
+.acc-opts .segmented { margin-top: 2px; }
+.acc-stats { margin: 8px 0 0; font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  border: 1px solid var(--line-2); background: transparent; color: var(--ink-2);
+  font: inherit; font-size: 12px; padding: 4px 10px; border-radius: 999px; cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.chip:hover { background: var(--hover); }
+.chip.active { background: var(--ink); border-color: var(--ink); color: var(--surface-solid); }
+.chip-fatal.active { background: var(--fatal); border-color: var(--fatal); color: #fff; }
+.chip-injury.active { background: var(--injury); border-color: var(--injury); color: #fff; }
+
+/* 事故のポップアップ。見出しの帯が色付きなので閉じるボタンは白 */
+.acc-pop .maplibregl-popup-content { width: 340px; max-width: 85vw; }
+.acc-pop .maplibregl-popup-close-button { color: #fff; z-index: 1; }
+.acc-pop .maplibregl-popup-close-button:hover { background-color: rgba(255, 255, 255, 0.15); color: #fff; }
+.popup-header { color: #fff; font-size: 14px; font-weight: 700; padding: 10px 14px; display: flex; flex-direction: column; gap: 2px; }
+.popup-header small { font-size: 11px; font-weight: 400; opacity: 0.9; }
+.popup-body { padding: 10px 14px 12px; max-height: 46vh; overflow-y: auto; }
+.popup-section-title { font-size: 11px; font-weight: 700; color: var(--ink-2); letter-spacing: 0.05em; margin: 8px 0 5px; }
+.popup-section-title:first-child { margin-top: 0; }
+.popup-grid { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; font-size: 11.5px; }
+.popup-grid-label { color: var(--ink-2); white-space: nowrap; }
+.popup-grid-value { color: var(--ink); }
+.popup-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.popup-table th, .popup-table td { border: 1px solid var(--line-2); padding: 3px 6px; text-align: left; vertical-align: top; }
+.popup-table th { background: var(--hover); font-weight: 600; white-space: nowrap; }
+.popup-coords { margin-top: 8px; font-size: 10.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.popup-links { display: flex; gap: 8px; margin-top: 6px; }
+.popup-link { font-size: 11.5px; color: var(--injury); text-decoration: none; }
+:root[data-theme='dark'] .popup-link { color: #7aa7ff; }
+.popup-link:hover { text-decoration: underline; }

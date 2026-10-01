@@ -77,6 +77,63 @@
         <input id="borders" type="checkbox" />
         <span class="t-label">行政区域の境界（国土数値情報 N03）</span>
       </label>
+
+      <div class="field acc">
+        <div class="field-head"><span class="field-label">交通事故（警察庁 2019〜2024）</span></div>
+        <label class="toggle option">
+          <input id="acc-toggle" type="checkbox" />
+          <span class="t-label">人身事故 189.5 万件を重ねる（改正前の 6 年間）</span>
+        </label>
+        <div id="acc-opts" class="acc-opts" hidden>
+          <div class="acc-sec">事故内容</div>
+          <div class="chip-group" id="acc-naiyou">
+            <button class="chip chip-fatal active" data-value="死亡事故" type="button">死亡事故</button>
+            <button class="chip chip-injury active" data-value="負傷事故" type="button">負傷事故</button>
+          </div>
+          <div class="acc-sec">発生年</div>
+          <div class="chip-group" id="acc-year">
+            <button class="chip active" data-value="2019" type="button">2019</button>
+            <button class="chip active" data-value="2020" type="button">2020</button>
+            <button class="chip active" data-value="2021" type="button">2021</button>
+            <button class="chip active" data-value="2022" type="button">2022</button>
+            <button class="chip active" data-value="2023" type="button">2023</button>
+            <button class="chip active" data-value="2024" type="button">2024</button>
+          </div>
+          <div class="acc-sec">昼夜<span class="acc-note">（昼＝日の出〜日の入り／夜＝日の入り〜日の出）</span></div>
+          <div class="chip-group" id="acc-tyuya">
+            <button class="chip active" data-value="昼" type="button">☀ 昼</button>
+            <button class="chip active" data-value="夜" type="button">☾ 夜</button>
+          </div>
+          <div class="acc-sec">関与当事者</div>
+          <select id="acc-party" class="select">
+            <option value="" selected>すべて</option>
+            <option value="pedestrian">歩行者</option>
+            <option value="bicycle">自転車</option>
+            <option value="motorcycle">二輪車（自動二輪・原付）</option>
+            <option value="kickboard">特定小型原付（電動キックボード等）</option>
+            <option value="passenger">乗用車</option>
+            <option value="cargo">貨物車</option>
+          </select>
+          <div class="acc-sec">年齢階層<span class="acc-note">（当事者いずれかが該当）</span></div>
+          <select id="acc-age" class="select">
+            <option value="" selected>すべて</option>
+            <option value="0～24歳">0～24歳</option>
+            <option value="25～34歳">25～34歳</option>
+            <option value="35～44歳">35～44歳</option>
+            <option value="45～54歳">45～54歳</option>
+            <option value="55～64歳">55～64歳</option>
+            <option value="65～74歳">65～74歳</option>
+            <option value="75歳以上">75歳以上</option>
+            <option value="不明">不明</option>
+          </select>
+          <div class="acc-sec">表示モード</div>
+          <div id="acc-mode" class="segmented" role="tablist" aria-label="事故の表示モード">
+            <button type="button" role="tab" data-value="points" aria-selected="true">ポイント</button>
+            <button type="button" role="tab" data-value="heatmap" aria-selected="false">ヒートマップ</button>
+          </div>
+          <p id="acc-stats" class="acc-stats">&nbsp;</p>
+        </div>
+      </div>
     </div>
 
     <footer class="panel-foot">
@@ -87,6 +144,7 @@
       データ: <a href="https://github.com/gsi-cyberjapan/gsimaps-vector-experiment" target="_blank" rel="noopener">国土地理院 ベクトルタイル提供実験</a> /
       <a href="https://www.jartic.or.jp/service/opendata/" target="_blank" rel="noopener">JARTIC 交通規制情報</a> /
       背景: <a href="https://github.com/gsi-cyberjapan/optimal_bvmap" target="_blank" rel="noopener">最適化ベクトルタイル</a>
+      / 事故: <a href="https://www.npa.go.jp/publications/statistics/koutsuu/opendata/index_opendata.html" target="_blank" rel="noopener">警察庁 交通事故統計情報のオープンデータ</a>を加工して作成
       <br />測量法に基づく国土地理院長承認（使用）R 8JHs 407
       <span id="build-ver" class="build-ver"></span>
     </footer>
