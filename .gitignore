@@ -35,3 +35,6 @@ out/*.log
 # ビューワ(Vite)
 viewer/node_modules/
 viewer/dist/
+
+# 測量成果使用承認書の原本(氏名・申請 ID を含むのでコミットしない)
+docs/国地情使*.pdf

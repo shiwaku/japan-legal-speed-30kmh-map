@@ -229,6 +229,8 @@ docs/                       premise.md（前提と限界）, glossary.md（用�
 
 ## データ出典・ライセンス
 
+本成果は、測量法に基づく国土地理院長承認（使用）R 8JHs 407 を得て、国土地理院の数値地図（国土基本情報）電子国土基本図（地図情報）を使用して作成しました（承認日 2026-10-01、使用期間 承認後 1 年間）。JIS X 7115（JMP 2.0）のメタデータは [docs/metadata/](docs/metadata/japan-legal-speed-30kmh-map_jmp20.xml)。
+
 - 国土地理院 [ベクトルタイル提供実験](https://github.com/gsi-cyberjapan/gsimaps-vector-experiment)（`experimental_bvmap`、属性仕様は [attribute.pdf](https://maps.gsi.go.jp/help/pdf/vector/attribute.pdf)）— [国土地理院コンテンツ利用規約](https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html)
 - [JARTIC 交通規制情報](https://www.jartic.or.jp/service/opendata/)（拡張版標準フォーマット k_2.1）— JARTIC オープンデータ利用規約
 - 市域: [geoshape.ex.nii.ac.jp 行政区域データ](https://geoshape.ex.nii.ac.jp/city/)（川越）、[国土数値情報 行政区域 N03-20240101](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2024.html)（札幌、10 区を結合）

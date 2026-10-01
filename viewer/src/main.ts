@@ -102,7 +102,7 @@ function addDataLayers(): void {
   const a = areas[current];
   map.addSource("roads", {
     type: "vector", url: `pmtiles://${tilesUrl(current, a)}`,
-    attribution: '<a href="https://github.com/gsi-cyberjapan/gsimaps-vector-experiment" target="_blank" rel="noopener">国土地理院 ベクトルタイル提供実験</a> / <a href="https://www.jartic.or.jp/service/opendata/" target="_blank" rel="noopener">JARTIC 交通規制情報</a>',
+    attribution: '<a href="https://github.com/gsi-cyberjapan/gsimaps-vector-experiment" target="_blank" rel="noopener">国土地理院 ベクトルタイル提供実験</a> / <a href="https://www.jartic.or.jp/service/opendata/" target="_blank" rel="noopener">JARTIC 交通規制情報</a> / 測量法に基づく国土地理院長承認（使用）R 8JHs 407',
   });
   map.addSource("muni", {
     type: "vector", url: `pmtiles://${MUNI_TILES}`,

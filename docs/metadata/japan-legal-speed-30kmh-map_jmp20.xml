@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  japan-legal-speed-30kmh-map の地理情報メタデータ。
+  JIS X 7115（地理情報－メタデータ）の日本版プロファイル JMP 2.0 に沿って作成。
+  測量法に基づく国土地理院長承認（使用）R 8JHs 407 の承認条件(4)による。
+  版を作り直したら dateStamp・citation の日付・lineage を更新すること。
+-->
+<MD_Metadata xmlns="http://zgate.gsi.go.jp/ch/jmp/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <fileIdentifier>japan-legal-speed-30kmh-map_20261001</fileIdentifier>
+  <language><isoCode>jpn</isoCode></language>
+  <characterSet><MD_CharacterSetCode>utf8</MD_CharacterSetCode></characterSet>
+  <hierarchyLevel><MD_ScopeCode>dataset</MD_ScopeCode></hierarchyLevel>
+  <contact>
+    <CI_ResponsibleParty>
+      <individualName>塩飽洋平</individualName>
+      <contactInfo>
+        <CI_Contact>
+          <onlineResource>
+            <CI_OnlineResource>
+              <linkage>https://github.com/shiwaku/japan-legal-speed-30kmh-map/issues</linkage>
+            </CI_OnlineResource>
+          </onlineResource>
+        </CI_Contact>
+      </contactInfo>
+      <role><CI_RoleCode>pointOfContact</CI_RoleCode></role>
+    </CI_ResponsibleParty>
+  </contact>
+  <dateStamp>2026-10-01</dateStamp>
+  <metadataStandardName>JMP</metadataStandardName>
+  <metadataStandardVersion>2.0</metadataStandardVersion>
+
+  <referenceSystemInfo>
+    <MD_ReferenceSystem>
+      <referenceSystemIdentifier>
+        <RS_Identifier><code>JGD2011 / 経緯度（EPSG:6668）。配信タイルは Web メルカトル（EPSG:3857）、延長計算は平面直角座標系（JGD2011）</code></RS_Identifier>
+      </referenceSystemIdentifier>
+    </MD_ReferenceSystem>
+  </referenceSystemInfo>
+
+  <identificationInfo>
+    <MD_DataIdentification>
+      <citation>
+        <CI_Citation>
+          <title>japan-legal-speed-30kmh-map（この道、60キロ→30キロ？）</title>
+          <date>
+            <CI_Date>
+              <date>2026-10-01</date>
+              <dateType><CI_DateTypeCode>publication</CI_DateTypeCode></dateType>
+            </CI_Date>
+          </date>
+          <otherCitationDetails>測量法に基づく国土地理院長承認（使用）R 8JHs 407</otherCitationDetails>
+        </CI_Citation>
+      </citation>
+      <abstract>2026年9月1日施行の改正道路交通法施行令により、中央線・車両通行帯・中央分離帯のいずれもない一般道路の法定速度が 60 km/h から 30 km/h に引き下げられた。本データは、国土地理院の電子国土基本図（地図情報）に基づく道路中心線（幅員区分・分離帯区分）と JARTIC 交通規制情報（最高速度・ゾーン30・車両通行帯・中央線）を突き合わせ、標識が無く法定速度 60 km/h だった道路のうち 30 km/h に変わった道路を全国について推定した線データ（PMTiles）と、都道府県・市区町村別の集計である。幅員 5.5 m 未満を中央線なしの代替指標としており、推定であって確定ではない。</abstract>
+      <purpose>改正後に法定速度が 30 km/h になった道路を地図で示すため。</purpose>
+      <status><MD_ProgressCode>onGoing</MD_ProgressCode></status>
+      <pointOfContact>
+        <CI_ResponsibleParty>
+          <individualName>塩飽洋平</individualName>
+          <role><CI_RoleCode>originator</CI_RoleCode></role>
+        </CI_ResponsibleParty>
+      </pointOfContact>
+      <resourceMaintenance>
+        <MD_MaintenanceInformation>
+          <maintenanceAndUpdateFrequency><MD_MaintenanceFrequencyCode>irregular</MD_MaintenanceFrequencyCode></maintenanceAndUpdateFrequency>
+        </MD_MaintenanceInformation>
+      </resourceMaintenance>
+      <descriptiveKeywords>
+        <MD_Keywords>
+          <keyword>法定速度</keyword>
+          <keyword>生活道路</keyword>
+          <keyword>30 km/h</keyword>
+          <keyword>道路中心線</keyword>
+          <keyword>交通規制</keyword>
+        </MD_Keywords>
+      </descriptiveKeywords>
+      <resourceConstraints>
+        <MD_LegalConstraints>
+          <useLimitation>測量法に基づく国土地理院長承認（使用）R 8JHs 407（承認日 2026-10-01、使用期間 承認後 1 年間）。JARTIC 交通規制情報はJARTIC オープンデータ利用規約、国土数値情報は国土数値情報利用約款に従う。推定であり、標識の現地確認に代わるものではない。</useLimitation>
+        </MD_LegalConstraints>
+      </resourceConstraints>
+      <spatialRepresentationType><MD_SpatialRepresentationTypeCode>vector</MD_SpatialRepresentationTypeCode></spatialRepresentationType>
+      <spatialResolution>
+        <MD_Resolution>
+          <equivalentScale><MD_RepresentativeFraction><denominator>25000</denominator></MD_RepresentativeFraction></equivalentScale>
+        </MD_Resolution>
+      </spatialResolution>
+      <language><isoCode>jpn</isoCode></language>
+      <characterSet><MD_CharacterSetCode>utf8</MD_CharacterSetCode></characterSet>
+      <topicCategory><MD_TopicCategoryCode>transportation</MD_TopicCategoryCode></topicCategory>
+      <extent>
+        <EX_Extent>
+          <description>日本全国（47 都道府県）</description>
+          <geographicElement>
+            <EX_GeographicBoundingBox>
+              <westBoundLongitude>122.93</westBoundLongitude>
+              <eastBoundLongitude>153.99</eastBoundLongitude>
+              <southBoundLatitude>20.42</southBoundLatitude>
+              <northBoundLatitude>45.56</northBoundLatitude>
+            </EX_GeographicBoundingBox>
+          </geographicElement>
+          <temporalElement>
+            <EX_TemporalExtent>
+              <extent>2026-09-01（改正施行令の施行日）時点の法定速度を推定。交通規制は 2026-07 時点</extent>
+            </EX_TemporalExtent>
+          </temporalElement>
+        </EX_Extent>
+      </extent>
+    </MD_DataIdentification>
+  </identificationInfo>
+
+  <distributionInfo>
+    <MD_Distribution>
+      <distributionFormat>
+        <MD_Format><name>PMTiles（Mapbox Vector Tile）</name><version>3</version></MD_Format>
+      </distributionFormat>
+      <distributionFormat>
+        <MD_Format><name>CSV（集計表）</name><version>-</version></MD_Format>
+      </distributionFormat>
+      <transferOptions>
+        <MD_DigitalTransferOptions>
+          <onLine><CI_OnlineResource><linkage>https://shiwaku.github.io/japan-legal-speed-30kmh-map/</linkage><description>地図（ビューワ）</description></CI_OnlineResource></onLine>
+          <onLine><CI_OnlineResource><linkage>https://shi-works.com/pmtiles/japan-legal-speed-30kmh-map/japan-legal-speed-30kmh.pmtiles</linkage><description>全国 PMTiles（Z12–16）</description></CI_OnlineResource></onLine>
+          <onLine><CI_OnlineResource><linkage>https://github.com/shiwaku/japan-legal-speed-30kmh-map</linkage><description>作成手順・コード・集計表</description></CI_OnlineResource></onLine>
+        </MD_DigitalTransferOptions>
+      </transferOptions>
+    </MD_Distribution>
+  </distributionInfo>
+
+  <dataQualityInfo>
+    <DQ_DataQuality>
+      <scope><DQ_Scope><level><MD_ScopeCode>dataset</MD_ScopeCode></level></DQ_Scope></scope>
+      <lineage>
+        <LI_Lineage>
+          <statement>国土地理院の基本測量成果（数値地図（国土基本情報）電子国土基本図（地図情報））を、測量法第30条第1項に基づく承認（R 8JHs 407）を得て使用した。道路中心線の位置・形状は使用した成果のまま変更しておらず、幅員区分等の属性と JARTIC 交通規制情報との空間的な重なりから法定速度の区分を推定して属性として付与した。</statement>
+          <processStep>
+            <LI_ProcessStep>
+              <description>国土地理院 ベクトルタイル提供実験（experimental_bvmap）の ZL16 タイルを全国分（約 216 万タイル）取得し、road レイヤーの道路中心線（ftCode 2701–2704 ほか）を GDAL の MVT ドライバで抽出。タイル境界・行政区域でクリップ。</description>
+              <dateTime>2026-09-11</dateTime>
+            </LI_ProcessStep>
+          </processStep>
+          <processStep>
+            <LI_ProcessStep>
+              <description>一次判定: rnkWidth ≤ 1（幅員 5.5 m 未満）かつ medSect = 0（分離帯なし）かつ高速道路等でない区間を候補、rnkWidth 2–4（5.5 m 以上）を不明とする。</description>
+            </LI_ProcessStep>
+          </processStep>
+          <processStep>
+            <LI_ProcessStep>
+              <description>JARTIC 交通規制情報（2026-07、拡張版標準フォーマット k_2.1）の最高速度（線）・車両通行帯・中央線を 10 m バッファし、候補線分の長さの 70% 以上が含まれれば規制あり、最高速度（面、ゾーン30 等）に 50% 以上含まれれば規制ありとする。残りを「60→30 変更（推定）」とする。</description>
+            </LI_ProcessStep>
+          </processStep>
+          <processStep>
+            <LI_ProcessStep>
+              <description>tippecanoe で PMTiles（全国 Z12–16、市区町村 Z9–）を作成。国土数値情報 行政区域（N03-20240101）で都道府県・市区町村別に集計し、道路統計年報 2024 の実延長で道路法上の道路に換算。</description>
+            </LI_ProcessStep>
+          </processStep>
+          <source>
+            <LI_Source>
+              <description>数値地図（国土基本情報）電子国土基本図（地図情報）— 国土地理院 ベクトルタイル提供実験（experimental_bvmap、ZL16）および最適化ベクトルタイル（optimal_bvmap-v1、背景地図）。2026-09 取得</description>
+              <sourceCitation><CI_Citation><title>電子国土基本図（地図情報）</title><date><CI_Date><date>2026-09-11</date><dateType><CI_DateTypeCode>revision</CI_DateTypeCode></dateType></CI_Date></date></CI_Citation></sourceCitation>
+            </LI_Source>
+          </source>
+          <source>
+            <LI_Source>
+              <description>JARTIC 交通規制情報（2026-07、拡張版標準フォーマット k_2.1）— 公益財団法人日本道路交通情報センター</description>
+            </LI_Source>
+          </source>
+          <source>
+            <LI_Source>
+              <description>国土数値情報 行政区域データ N03-20240101 — 国土交通省</description>
+            </LI_Source>
+          </source>
+          <source>
+            <LI_Source>
+              <description>道路統計年報 2024 道路の現況 表15/19/22/25 — 国土交通省</description>
+            </LI_Source>
+          </source>
+        </LI_Lineage>
+      </lineage>
+    </DQ_DataQuality>
+  </dataQualityInfo>
+</MD_Metadata>
